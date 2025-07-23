@@ -1,9 +1,12 @@
+import { Types } from "mongoose";
+
 interface IUser {
   address: string;
   fullName: string;
   email: string;
   role: string;
-  createdAt: Date;
+  createdAt?: Date;
+  UpdatedAt?: Date;
 }
 
 interface IPeserta extends IUser {
@@ -12,4 +15,9 @@ interface IPeserta extends IUser {
   isActivated: boolean;
 }
 
-export { IUser, IPeserta };
+interface IUserToken
+  extends Omit<IUser, "createdAt" | "UpdatedAt"> {
+  id?: Types.ObjectId;
+}
+
+export { IUser, IPeserta, IUserToken };
