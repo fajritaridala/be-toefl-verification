@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import { IUser, IPeserta } from "../interfaces/IUser";
+import { IUser, IPeserta } from "../interfaces/auth.interface";
+import { ROLES } from "../utils/contant";
 
 const options = {
   discriminatorKey: "role",
@@ -15,6 +16,7 @@ const UserSchema = new Schema<IUser>(
     address: {
       type: Schema.Types.String,
       required: true,
+      unique: true,
     },
     fullName: {
       type: Schema.Types.String,
@@ -27,8 +29,8 @@ const UserSchema = new Schema<IUser>(
     },
     role: {
       type: Schema.Types.String,
-      enum: ["peserta", "admin"],
-      default: "peserta",
+      enum: [ROLES.ADMIN, ROLES.PESERTA],
+      default: ROLES.PESERTA,
     },
   },
   options

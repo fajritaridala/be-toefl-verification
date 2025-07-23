@@ -1,12 +1,13 @@
+type TLogin = {
+  address: string;
+};
+
 type TRegister = {
   address: string;
   fullName: string;
   email: string;
-  role: string;
+  roleToken?: string;
 };
 
-type TLogin = {
-  address: string;
-};
 
 export { TRegister, TLogin };
