@@ -1,13 +1,13 @@
 import mongoose from "mongoose";
-import { UserSchema, PesertaSchema } from "../schemas/UserSchema";
+import dbSchema from "../schemas/database.schema";
 import { IUser, IPeserta } from "../interfaces/auth.interface";
 import { ROLES } from "../utils/contant";
 
-const UserModel = mongoose.model<IUser>("User", UserSchema);
+const UserModel = mongoose.model<IUser>("users", dbSchema.user);
 const PesertaModel = UserModel.discriminator<IPeserta>(
   ROLES.PESERTA,
-  PesertaSchema
+  dbSchema.peserta
 );
-const AdminModel = UserModel.discriminator<IUser>(ROLES.ADMIN, UserSchema);
+const AdminModel = UserModel.discriminator<IUser>(ROLES.ADMIN, dbSchema.user);
 
 export { UserModel, PesertaModel, AdminModel };

@@ -50,4 +50,4 @@ const PesertaSchema = new Schema<IPeserta>({
   },
 });
 
-export { UserSchema, PesertaSchema };
+export default { user: UserSchema, peserta: PesertaSchema };
