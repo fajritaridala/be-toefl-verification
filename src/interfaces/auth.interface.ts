@@ -18,8 +18,7 @@ interface IPeserta extends IUser {
 }
 
 // Token jwt
-interface IUserToken
-  extends Omit<IUser, "createdAt" | "UpdatedAt"> {
+interface IUserToken extends Omit<IUser, "createdAt" | "UpdatedAt"> {
   id?: Types.ObjectId;
 }
 
@@ -27,4 +26,9 @@ interface IReqUser extends Request {
   user?: IUserToken;
 }
 
-export { IUser, IPeserta, IUserToken, IReqUser };
+export {
+  IUser,
+  IPeserta,
+  IUserToken,
+  IReqUser
+};
