@@ -7,19 +7,25 @@ import dashboardController from "../controllers/dashboardController";
 
 const router = express.Router();
 
+// Auth routes
 router.post("/auth/register", authController.register);
 router.post("/auth/login", authController.login);
 
-// admin routes
-router.get("/admin/dashboard/unprocessed", [
+// Admin routes
+router.get("/admin/participants", [
   authMiddleware,
   aclMiddleware([ROLES.ADMIN]),
-  dashboardController.getUnprocessParticipants,
+  dashboardController.getParticipants,
+]);
+router.get("/admin/participants/unprocessed", [
+  authMiddleware,
+  aclMiddleware([ROLES.ADMIN]),
+  dashboardController.getUnprocessedParticipants,
 ]);
 router.get("/admin/dashboard", [
   authMiddleware,
   aclMiddleware([ROLES.ADMIN]),
-  dashboardController.getData,
+  dashboardController.getDashboard,
 ]);
 
 export default router;

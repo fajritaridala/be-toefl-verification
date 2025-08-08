@@ -3,9 +3,31 @@ import { UserModel } from "../models/user.model";
 import { ROLES } from "../utils/contant";
 
 export default {
-  async getUnprocessParticipants(req: Request, res: Response) {
+  // Get seluruh peserta
+  async getParticipants(req: Request, res: Response) {
     try {
-      const unprocessParticipants = await UserModel.find({
+      const participants = await UserModel.find({
+        role: ROLES.PESERTA,
+      })
+        .select("fullName email address isActivated createdAt")
+        .sort({ createdAt: -1 });
+
+      res.status(200).json({
+        message: "Participants retrieved successfully",
+        data: participants,
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "An error occurred while retrieving participants",
+        data: null,
+      });
+    }
+  },
+
+  // Get peserta yang belum aktif
+  async getUnprocessedParticipants(req: Request, res: Response) {
+    try {
+      const unprocessedParticipants = await UserModel.find({
         role: ROLES.PESERTA,
         isActivated: false,
       })
@@ -15,7 +37,7 @@ export default {
 
       res.status(200).json({
         message: "Unprocessed participants retrieved successfully",
-        data: unprocessParticipants,
+        data: unprocessedParticipants,
       });
     } catch (error) {
       res.status(500).json({
@@ -25,23 +47,22 @@ export default {
     }
   },
 
-  async getData(req: Request, res: Response) {
+  // Get dashboard data
+  async getDashboard(req: Request, res: Response) {
     try {
-      // Get summary data
-      const participants = await UserModel.countDocuments({
+      const totalParticipants = await UserModel.countDocuments({
         role: ROLES.PESERTA,
       });
-      const isActivated = await UserModel.countDocuments({
+      const processedParticipants = await UserModel.countDocuments({
         role: ROLES.PESERTA,
         isActivated: true,
       });
-      const notActivated = await UserModel.countDocuments({
+      const unprocessedParticipants = await UserModel.countDocuments({
         role: ROLES.PESERTA,
         isActivated: false,
       });
 
-      // Get latest unprocessed participants
-      const unprocessParticipants = await UserModel.find({
+      const latestUnprocessed = await UserModel.find({
         role: ROLES.PESERTA,
         isActivated: false,
       })
@@ -49,18 +70,18 @@ export default {
         .sort({ createdAt: -1 })
         .limit(10);
 
-      const result = {
-        summary: {
-          totalParticipants: participants,
-          processedParticipants: isActivated,
-          unprocessParticipants: notActivated,
+      const dashboardData = {
+        statistics: {
+          totalParticipants,
+          processedParticipants,
+          unprocessedParticipants,
         },
-        latestUnprocess: unprocessParticipants,
+        latestUnprocessed,
       };
 
       res.status(200).json({
         message: "Dashboard data retrieved successfully",
-        data: result,
+        data: dashboardData,
       });
     } catch (error) {
       res.status(500).json({
