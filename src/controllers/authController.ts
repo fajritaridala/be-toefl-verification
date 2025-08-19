@@ -1,19 +1,16 @@
 import { Request, Response } from "express";
-import { TRegister, TLogin } from "../types/auth.types";
-import {
-  registerValidateSchema,
-  loginValidateSchema,
-} from "../schemas/auth.schema";
+import { TRegister, TLogin } from "../utils/types";
+import schema from "../utils/schemas";
 import { UserModel } from "../models/user.model";
 import { generateToken } from "../utils/jwt";
-import { ROLES } from "../utils/contant";
+import { ROLES } from "../utils/constant";
 
 export default {
   async login(req: Request, res: Response) {
     try {
       const { address } = req.body as unknown as TLogin;
 
-      await loginValidateSchema.validate({ address });
+      await schema.login.validate({ address });
 
       const existingUser = await UserModel.findOne({ address });
 
@@ -50,14 +47,10 @@ export default {
 
   async register(req: Request, res: Response) {
     try {
-      const {
-        address,
-        fullName,
-        email,
-        roleToken,
-      } = req.body as unknown as TRegister;
+      const { address, fullName, email, roleToken } =
+        req.body as unknown as TRegister;
 
-      await registerValidateSchema.validate({
+      await schema.register.validate({
         address,
         fullName,
         email,

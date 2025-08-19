@@ -2,8 +2,9 @@ import express from "express";
 import authController from "../controllers/authController";
 import authMiddleware from "../middlewares/auth.middleware";
 import aclMiddleware from "../middlewares/acl.middleware";
-import { ROLES } from "../utils/contant";
+import { ROLES } from "../utils/constant";
 import dashboardController from "../controllers/dashboardController";
+import participantController from "../controllers/participantController";
 
 const router = express.Router();
 
@@ -11,21 +12,28 @@ const router = express.Router();
 router.post("/auth/register", authController.register);
 router.post("/auth/login", authController.login);
 
-// Admin routes
-router.get("/admin/participants", [
+// Dashboad
+router.get("/dashboard", [
   authMiddleware,
   aclMiddleware([ROLES.ADMIN]),
-  dashboardController.getParticipants,
+  dashboardController.Overview,
 ]);
-router.get("/admin/participants/unprocessed", [
+
+// Participant
+router.get("/participants", [
   authMiddleware,
   aclMiddleware([ROLES.ADMIN]),
-  dashboardController.getUnprocessedParticipants,
+  participantController.getAllParticipants,
 ]);
-router.get("/admin/dashboard", [
+router.get("/participants/unprocessed", [
   authMiddleware,
   aclMiddleware([ROLES.ADMIN]),
-  dashboardController.getDashboard,
+  participantController.getUnprocessed,
+]);
+router.get("/participants/processed", [
+  authMiddleware,
+  aclMiddleware([ROLES.ADMIN]),
+  participantController.getProcessed,
 ]);
 
 export default router;

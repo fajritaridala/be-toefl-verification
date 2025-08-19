@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { IUserToken } from "../interfaces/auth.interface";
+import { IUserToken } from "./interfaces";
 import { JWT_SECRET } from "./env";
 
 const generateToken = (user: IUserToken): string => {
