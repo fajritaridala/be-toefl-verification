@@ -1,18 +1,18 @@
-import { Request,Response } from "express";
+import { Response } from "express";
 import { PesertaModel } from "../models/user.model";
-import { TOverview } from "../utils/types";
+import { IReqUser } from "../utils/interfaces";
 
 export default {
-  async Overview(req: Request, res: Response) {
+  async Overview(req: IReqUser, res: Response) {
     try {
-      const result: TOverview = await PesertaModel.getOverview();
+      const result = await PesertaModel.getOverview();
       res.status(200).json({
-        message: "Dashboard data retrieved successfully",
+        message: "data successfully received",
         data: result,
       });
     } catch (error) {
       res.status(500).json({
-        message: "An error occurred while retrieving dashboard data",
+        message: "an error occurred while retrieving data",
         data: null,
       });
     }

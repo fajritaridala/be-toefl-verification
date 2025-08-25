@@ -1,49 +1,49 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { PesertaModel } from "../models/user.model";
+import { IReqUser } from "../utils/interfaces";
 
 export default {
-  async getAllParticipants(req: Request, res: Response) {
+  async getAll(req: IReqUser, res: Response) {
     try {
-      const result = await PesertaModel.getAllParticipant();
+      const result = await PesertaModel.getAllPeserta();
       res.status(200).json({
-        message: "Participants retrieved successfully",
+        message: "data successfully received",
         data: result,
       });
     } catch (error) {
       res.status(500).json({
-        message: "An error occurred while retrieving participants",
+        message: "an error occurred while retrieving data",
         data: null,
       });
     }
   },
-  async getProcessed(req: Request, res: Response) {
+  async getProcessed(req: IReqUser, res: Response) {
     try {
-      const result = await PesertaModel.getProcessedParticipant();
+      const result = await PesertaModel.getPesertaByActivated(true);
       res.status(200).json({
-        message: "Processed participants retrieved successfully",
+        message: "data successfully received",
         data: result,
       });
     } catch (error) {
       res.status(500).json({
-        message: "An error occurred while retrieving processed participants",
+        message: "an error occurred while retrieving data",
         data: null,
       });
     }
   },
-
-  // Get peserta yang belum aktif
-  async getUnprocessed(req: Request, res: Response) {
+  async getUnprocessed(req: IReqUser, res: Response) {
     try {
-      const pesertaNotActivated =
-        await PesertaModel.getUnprocessedParticipants();
+      const pesertaNotActivated = await PesertaModel.getPesertaByActivated(
+        false
+      );
 
       res.status(200).json({
-        message: "Unprocessed participants retrieved successfully",
+        message: "data successfully received",
         data: pesertaNotActivated,
       });
     } catch (error) {
       res.status(500).json({
-        message: "An error occurred while retrieving unprocessed participants",
+        message: "an error occurred while retrieving data",
         data: null,
       });
     }

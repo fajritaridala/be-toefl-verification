@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { Types, Model } from "mongoose";
 import { Request } from "express";
 
 interface IUser {
@@ -15,6 +15,35 @@ interface IPeserta extends IUser {
   hash_toefl: string;
   cid_certificate: string;
   isActivated: boolean;
+  dataToefl?: IDataToefl;
+}
+
+interface IPesertaModel extends Model<IPeserta> {
+  getAllPeserta(): Promise<{
+    address: string;
+    fullName: string;
+    email: string;
+    isActivated: boolean;
+  }>;
+  getPesertaByActivated(isActivated: boolean): Promise<{
+    address: string;
+    fullName: string;
+    email: string;
+    isActivated: boolean;
+  }>;
+  getOverview(): Promise<{
+    statistics: {
+      totalPeserta: number;
+      activatedPeserta: number;
+      notActivatedPeserta: number;
+    };
+    latestNotActivatedPeserta: {
+      address: string;
+      fullName: string;
+      email: string;
+      isActivated: boolean;
+    };
+  }>;
 }
 
 // Token jwt
@@ -26,32 +55,17 @@ interface IReqUser extends Request {
   user?: IUserToken;
 }
 
-// Dashboard interfaces
-interface IDashboardSummary {
-  totalParticipants: number;
-  processedParticipants: number;
-  unprocessedParticipants: number;
+interface IToeflScore {
+  listening: number;
+  reading: number;
+  writing: number;
 }
 
-interface IUnprocessedParticipant {
-  _id: Types.ObjectId;
-  fullName: string;
-  email: string;
-  address: string;
-  createdAt: Date;
+interface IDataToefl {
+  nim: string;
+  major: string;
+  sessionTest: number;
+  score: IToeflScore;
 }
 
-interface IDashboardData {
-  summary: IDashboardSummary;
-  latestUnprocessed: IUnprocessedParticipant[];
-}
-
-export {
-  IUser,
-  IPeserta,
-  IUserToken,
-  IReqUser,
-  IDashboardSummary,
-  IUnprocessedParticipant,
-  IDashboardData,
-};
+export { IUser, IPeserta, IPesertaModel, IUserToken, IReqUser, IDataToefl, IToeflScore };

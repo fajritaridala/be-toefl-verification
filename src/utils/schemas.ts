@@ -1,7 +1,9 @@
 import * as Yup from "yup";
 import mongoose from "mongoose";
 import { ROLES } from "../utils/constant";
-import { IUser, IPeserta } from "./interfaces";
+import { IUser, IPeserta, IToeflScore, IDataToefl } from "./interfaces";
+
+const Schema = mongoose.Schema;
 
 // register schema
 const registerValidateSchema = Yup.object({
@@ -15,15 +17,7 @@ const loginValidateSchema = Yup.object({
   address: Yup.string().required(),
 });
 
-const options = {
-  discriminatorKey: "role",
-  collection: "users",
-  timestamps: true,
-};
-
-const Schema = mongoose.Schema;
-
-// base database
+// base collection
 const UserSchema = new Schema<IUser>(
   {
     address: {
@@ -46,10 +40,54 @@ const UserSchema = new Schema<IUser>(
       default: ROLES.PESERTA,
     },
   },
-  options
+  {
+    discriminatorKey: "role",
+    collection: "users",
+    timestamps: true,
+  }
 );
 
-// tambahan untuk peserta
+// collection peserta
+const ToeflScore = new Schema<IToeflScore>(
+  {
+    listening: {
+      type: Schema.Types.Number,
+      required: true,
+      default: 0,
+    },
+    reading: {
+      type: Schema.Types.Number,
+      required: true,
+      default: 0,
+    },
+    writing: {
+      type: Schema.Types.Number,
+      required: true,
+      default: 0,
+    },
+  },
+  { _id: false }
+);
+
+const DataToefl = new Schema<IDataToefl>({
+  nim: {
+    type: Schema.Types.String,
+    required: true,
+  },
+  major: {
+    type: Schema.Types.String,
+    required: true,
+  },
+  sessionTest: {
+    type: Schema.Types.Number,
+    required: true,
+  },
+  score: {
+    type: ToeflScore,
+    requred: true,
+  },
+});
+
 const PesertaSchema = new Schema<IPeserta>({
   hash_toefl: {
     type: Schema.Types.String,
@@ -61,53 +99,73 @@ const PesertaSchema = new Schema<IPeserta>({
     type: Schema.Types.Boolean,
     default: false,
   },
+  dataToefl: {
+    type: DataToefl,
+    required: false,
+  },
 });
 
-PesertaSchema.statics.getAllParticipant = function () {
-  return this.find({}).select("address fullName email isActivated -_id").lean();
-};
-
-PesertaSchema.statics.getProcessedParticipant = function () {
-  return this.find({ isActivated: true })
-    .select("address fullName email createdAt -_id")
-    .sort({ createdAt: -1 })
-    .limit(10)
-    .lean();
-};
-
-PesertaSchema.statics.getUnprocessedParticipants = function () {
-  return this.find({ isActivated: false })
-    .select("fullName email address createdAt -_id")
-    .sort({ createdAt: -1 })
-    .limit(10)
-    .lean();
-};
-
-PesertaSchema.statics.getOverview = async function () {
-  const [
-    participants,
-    activatedParticipant,
-    notActivatedParticipant,
-    latestNotActivatedParticipant,
-  ] = await Promise.all([
-    this.countDocuments({}),
-    this.countDocuments({ isActivated: true }),
-    this.countDocuments({ isActivated: false }),
-    this.find({ isActivated: false })
-      .select("fullName email address createdAt -_id")
-      .sort({ createdAt: -1 })
-      .limit(10)
-      .lean(),
-  ]);
-
-  return {
-    statistics: {
-      participants,
-      activatedParticipant,
-      notActivatedParticipant,
-    },
-    latestNotActivatedParticipant,
-  };
+PesertaSchema.statics = {
+  getAllPeserta() {
+    return this.find({}).select("address fullName email isActivated -_id");
+  },
+  getPesertaByActivated(isActivated: boolean) {
+    return this.aggregate([
+      { $match: { isActivated } },
+      {
+        $project: {
+          address: "$address",
+          fullName: "$fullName",
+          email: "$email",
+          isActivated: "$isActivated",
+        },
+      },
+      { $sort: { createdAt: -1 } },
+      { $limit: 10 },
+    ]);
+  },
+  getOverview() {
+    return this.aggregate([
+      {
+        $group: {
+          _id: null,
+          pesertaTotal: { $sum: 1 },
+          activatedPeserta: { $sum: { $cond: ["$isActivated", 1, 0] } },
+          notActivatedPeserta: { $sum: { $cond: ["$isActivated", 0, 1] } },
+        },
+      },
+      {
+        $project: {
+          statistics: {
+            pesertaTotal: "$pesertaTotal",
+            activatedPeserta: "$activatedPeserta",
+            notActivatedPeserta: "$notActivatedPeserta",
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          let: {},
+          pipeline: [
+            { $match: { isActivated: false } },
+            { $sort: { createdAt: -1 } },
+            { $limit: 10 },
+            {
+              $project: {
+                _id: 0,
+                address: "$address",
+                fullName: "$fullName",
+                email: "$email",
+                isActivated: "$isActivated",
+              },
+            },
+          ],
+          as: "latestNotActivatedPeserta",
+        },
+      },
+    ]);
+  },
 };
 
 export default {

@@ -23,7 +23,7 @@ router.get("/dashboard", [
 router.get("/participants", [
   authMiddleware,
   aclMiddleware([ROLES.ADMIN]),
-  participantController.getAllParticipants,
+  participantController.getAll,
 ]);
 router.get("/participants/unprocessed", [
   authMiddleware,

@@ -1,9 +1,19 @@
 import { Request, Response } from "express";
-import { TRegister, TLogin } from "../utils/types";
 import schema from "../utils/schemas";
 import { UserModel } from "../models/user.model";
 import { generateToken } from "../utils/jwt";
 import { ROLES } from "../utils/constant";
+
+type TLogin = {
+  address: string;
+};
+
+type TRegister = {
+  address: string;
+  fullName: string;
+  email: string;
+  roleToken?: string;
+};
 
 export default {
   async login(req: Request, res: Response) {
@@ -24,14 +34,14 @@ export default {
         });
 
         res.status(200).json({
-          message: "Login successful",
+          message: "login successful",
           data: {
             user: tokenJwt,
           },
         });
       } else {
         return res.status(404).json({
-          message: "Address not registered",
+          message: "address not registered",
           needsRegistration: true,
           data: { address },
         });
@@ -70,8 +80,8 @@ export default {
         role,
       });
 
-      res.status(200).json({
-        message: "Registration successful",
+      res.status(201).json({
+        message: "registration successful",
         data: result,
       });
     } catch (error) {
