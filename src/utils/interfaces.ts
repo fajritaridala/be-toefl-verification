@@ -12,10 +12,9 @@ interface IUser {
 
 // Interface tambahan untuk peserta
 interface IPeserta extends IUser {
-  hash_toefl: string;
-  cid_certificate: string;
-  isActivated: boolean;
-  dataToefl?: IDataToefl;
+  hashToefl?: string;
+  cidCertificate?: string;
+  isActivated?: boolean;
 }
 
 interface IPesertaModel extends Model<IPeserta> {
@@ -55,17 +54,4 @@ interface IReqUser extends Request {
   user?: IUserToken;
 }
 
-interface IToeflScore {
-  listening: number;
-  reading: number;
-  writing: number;
-}
-
-interface IDataToefl {
-  nim: string;
-  major: string;
-  sessionTest: number;
-  score: IToeflScore;
-}
-
-export { IUser, IPeserta, IPesertaModel, IUserToken, IReqUser, IDataToefl, IToeflScore };
+export { IUser, IPeserta, IPesertaModel, IUserToken, IReqUser };

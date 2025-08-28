@@ -1,7 +1,7 @@
 import * as Yup from "yup";
 import mongoose from "mongoose";
 import { ROLES } from "../utils/constant";
-import { IUser, IPeserta, IToeflScore, IDataToefl } from "./interfaces";
+import { IUser, IPeserta } from "./interfaces";
 
 const Schema = mongoose.Schema;
 
@@ -15,6 +15,21 @@ const registerValidateSchema = Yup.object({
 
 const loginValidateSchema = Yup.object({
   address: Yup.string().required(),
+});
+
+const inputValidateSchema = Yup.object({
+  address: Yup.string().required(),
+  fullName: Yup.string().required(),
+  email: Yup.string().email().required(),
+  nim: Yup.string().required(),
+  major: Yup.string().required(),
+  dateTest: Yup.date()
+    .default(() => new Date())
+    .required(),
+  sessionTest: Yup.number().required(),
+  listening: Yup.number().required(),
+  reading: Yup.number().required(),
+  writing: Yup.number().required(),
 });
 
 // base collection
@@ -48,60 +63,16 @@ const UserSchema = new Schema<IUser>(
 );
 
 // collection peserta
-const ToeflScore = new Schema<IToeflScore>(
-  {
-    listening: {
-      type: Schema.Types.Number,
-      required: true,
-      default: 0,
-    },
-    reading: {
-      type: Schema.Types.Number,
-      required: true,
-      default: 0,
-    },
-    writing: {
-      type: Schema.Types.Number,
-      required: true,
-      default: 0,
-    },
-  },
-  { _id: false }
-);
-
-const DataToefl = new Schema<IDataToefl>({
-  nim: {
-    type: Schema.Types.String,
-    required: true,
-  },
-  major: {
-    type: Schema.Types.String,
-    required: true,
-  },
-  sessionTest: {
-    type: Schema.Types.Number,
-    required: true,
-  },
-  score: {
-    type: ToeflScore,
-    requred: true,
-  },
-});
-
 const PesertaSchema = new Schema<IPeserta>({
-  hash_toefl: {
+  hashToefl: {
     type: Schema.Types.String,
   },
-  cid_certificate: {
+  cidCertificate: {
     type: Schema.Types.String,
   },
   isActivated: {
     type: Schema.Types.Boolean,
     default: false,
-  },
-  dataToefl: {
-    type: DataToefl,
-    required: false,
   },
 });
 
@@ -173,4 +144,5 @@ export default {
   peserta: PesertaSchema,
   register: registerValidateSchema,
   login: loginValidateSchema,
+  input: inputValidateSchema,
 };
