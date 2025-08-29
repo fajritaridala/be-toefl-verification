@@ -137,6 +137,9 @@ PesertaSchema.statics = {
       },
     ]);
   },
+  findToeflHashByAddress(address: string) {
+    return this.find({}).select("hashToefl -_id");
+  },
 };
 
 export default {

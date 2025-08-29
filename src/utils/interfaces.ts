@@ -43,6 +43,9 @@ interface IPesertaModel extends Model<IPeserta> {
       isActivated: boolean;
     };
   }>;
+  findToeflHashByAddress(address: string): Promise<{
+    hashToefl: string;
+  }>;
 }
 
 // Token jwt
