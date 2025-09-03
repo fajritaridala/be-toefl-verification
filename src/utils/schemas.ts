@@ -76,6 +76,7 @@ const PesertaSchema = new Schema<IPeserta>({
   },
 });
 
+// statics
 PesertaSchema.statics = {
   getAllPeserta() {
     return this.find({}).select("address fullName email isActivated -_id");

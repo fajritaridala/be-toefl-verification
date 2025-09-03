@@ -3,6 +3,7 @@ import schema from "../utils/schemas";
 import { UserModel } from "../models/user.model";
 import { generateToken } from "../utils/jwt";
 import { ROLES } from "../utils/constant";
+import { IReqUser } from "../utils/interfaces";
 
 type TLogin = {
   address: string;
@@ -26,7 +27,6 @@ export default {
 
       if (existingUser) {
         const tokenJwt = generateToken({
-          id: existingUser._id,
           address: existingUser.address,
           fullName: existingUser.fullName,
           email: existingUser.email,
@@ -82,6 +82,24 @@ export default {
 
       res.status(201).json({
         message: "registration successful",
+        data: result,
+      });
+    } catch (error) {
+      const err = error as unknown as Error;
+      res.status(400).json({
+        message: err.message,
+        data: null,
+      });
+    }
+  },
+
+  async me(req: IReqUser, res: Response) {
+    try {
+      const address = req.user?.address;
+      const result = await UserModel.findOne({ address }).lean();
+
+      res.status(200).json({
+        message: "data successfully received",
         data: result,
       });
     } catch (error) {

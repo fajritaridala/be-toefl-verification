@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
+import cors from "cors";
 import bodyParser from "body-parser";
 import router from "./routes/api";
 import db from "./utils/database";
@@ -14,6 +15,7 @@ async function init() {
     const app = express();
     const PORT = process.env.PORT;
 
+    app.use(cors());
     app.use(bodyParser.json());
     app.use("/api", router);
     app.listen(PORT, () => {

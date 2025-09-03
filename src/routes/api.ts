@@ -11,6 +11,7 @@ const router: Router = express.Router();
 // Auth routes
 router.post("/auth/register", authController.register);
 router.post("/auth/login", authController.login);
+router.get("/auth/me", authMiddleware, authController.me)
 
 // Admin routes
 router.get("/participants", [
