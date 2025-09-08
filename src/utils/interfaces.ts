@@ -49,7 +49,8 @@ interface IPesertaModel extends Model<IPeserta> {
 }
 
 // Token jwt
-interface IUserToken extends Omit<IUser, "createdAt" | "UpdatedAt"> {
+interface IUserToken
+  extends Omit<IUser, "createdAt" | "UpdatedAt" | "fullName" | "email"> {
   id?: Types.ObjectId;
 }
 

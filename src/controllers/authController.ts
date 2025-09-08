@@ -28,8 +28,6 @@ export default {
       if (existingUser) {
         const tokenJwt = generateToken({
           address: existingUser.address,
-          fullName: existingUser.fullName,
-          email: existingUser.email,
           role: existingUser.role,
         });
 
@@ -40,7 +38,7 @@ export default {
           },
         });
       } else {
-        return res.status(404).json({
+        res.status(200).json({
           message: "address not registered",
           needsRegistration: true,
           data: { address },
