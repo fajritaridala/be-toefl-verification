@@ -1,5 +1,5 @@
-import { Types, Model } from "mongoose";
-import { Request } from "express";
+import { Types, Model } from 'mongoose';
+import { Request } from 'express';
 
 interface IUser {
   address: string;
@@ -17,13 +17,18 @@ interface IPeserta extends IUser {
   isActivated?: boolean;
 }
 
+interface ITOEFL {
+  address: string;
+  fullName: string;
+  email: string;
+  nim: string;
+  major: string;
+  sessionTest: string;
+  status: string;
+  testDate: Date;
+}
+
 interface IPesertaModel extends Model<IPeserta> {
-  getAllPeserta(): Promise<{
-    address: string;
-    fullName: string;
-    email: string;
-    isActivated: boolean;
-  }>;
   getPesertaByActivated(isActivated: boolean): Promise<{
     address: string;
     fullName: string;
@@ -47,10 +52,15 @@ interface IPesertaModel extends Model<IPeserta> {
     hashToefl: string;
   }>;
 }
+interface IPaginationQuery {
+  page: number;
+  limit: number;
+  search?: string;
+}
 
 // Token jwt
 interface IUserToken
-  extends Omit<IUser, "createdAt" | "UpdatedAt" | "fullName" | "email"> {
+  extends Omit<IUser, 'createdAt' | 'UpdatedAt' | 'fullName' | 'email'> {
   id?: Types.ObjectId;
 }
 
@@ -58,4 +68,12 @@ interface IReqUser extends Request {
   user?: IUserToken;
 }
 
-export { IUser, IPeserta, IPesertaModel, IUserToken, IReqUser };
+export {
+  IUser,
+  IPeserta,
+  ITOEFL,
+  IPesertaModel,
+  IUserToken,
+  IReqUser,
+  IPaginationQuery,
+};
