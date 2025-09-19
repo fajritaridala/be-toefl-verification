@@ -1,11 +1,11 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 dotenv.config();
 
-import express from "express";
-import cors from "cors";
-import bodyParser from "body-parser";
-import router from "./routes/api";
-import db from "./utils/database";
+import express from 'express';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import router from './routes/api';
+import db from './utils/database';
 
 async function init() {
   try {
@@ -17,9 +17,9 @@ async function init() {
 
     app.use(cors());
     app.use(bodyParser.json());
-    app.use("/api", router);
+    app.use('/api', router);
     app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
+      console.log(`Server is running on http://localhost:${PORT}/api`);
     });
   } catch (error) {
     console.log(error);

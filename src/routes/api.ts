@@ -27,12 +27,12 @@ router.post('/toefls/:address/register', [
 router.patch('/toefls/:address/input', [
   authMiddleware,
   aclMiddleware([ROLES.ADMIN]),
-  toeflController.input
+  toeflController.input,
 ]);
 router.patch('/toefls/:address/upload-certificate', [
   authMiddleware,
   aclMiddleware([ROLES.ADMIN]),
-  mediaMiddleware.uploadSingle("file"),
-  toeflController.uploadCertificate
-])
+  mediaMiddleware.uploadSingle('file'),
+  toeflController.uploadCertificate,
+]);
 export default router;

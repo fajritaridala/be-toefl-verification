@@ -1,24 +1,27 @@
 import { PinataSDK } from 'pinata';
-import { PINATA_GATEAWAY_BASE, PINATA_GROUP, PINATA_JWT } from './env';
+import { PINATA_GATEAWAY, PINATA_GROUP_PRIVATE, PINATA_JWT } from './env';
 
 const pinata = new PinataSDK({
   pinataJwt: PINATA_JWT,
-  pinataGateway: PINATA_GATEAWAY_BASE,
+  pinataGateway: PINATA_GATEAWAY,
 });
 
 export default {
   async uploadCertificate(file: Express.Multer.File) {
     try {
-      const upload = await pinata.upload.private
-        .file(
-          new File([file.buffer], file.originalname, { type: file.mimetype })
-        )
-        .group(PINATA_GROUP);
+      const filePinata = new File([file.buffer], file.originalname, {
+        type: file.mimetype,
+      });
+      const uploadPrivate = await pinata.upload.private
+        .file(filePinata)
+        .group(PINATA_GROUP_PRIVATE);
+
+      // const uploadPublic = await pinata.upload.public.file(filePinata);
 
       const result = {
-        cid: upload.cid,
-        url: `https://${PINATA_GATEAWAY_BASE}/ipfs/${upload.cid}`,
-        size: upload.size,
+        cid: uploadPrivate.cid,
+        url: `https://${PINATA_GATEAWAY}/ipfs/${uploadPrivate.cid}`,
+        size: uploadPrivate.size,
       };
       return result;
     } catch (error) {
