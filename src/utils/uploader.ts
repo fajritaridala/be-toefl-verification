@@ -1,43 +1,29 @@
-import axios from "axios";
-import FormData from "form-data";
-import { PINATA_GATEAWAY_BASE, PINATA_JWT, PINATA_URL } from "./env";
-import { PINATA } from "./constant";
+import { PinataSDK } from 'pinata';
+import { PINATA_GATEAWAY_BASE, PINATA_GROUP, PINATA_JWT } from './env';
 
-export type TPinataResult = {
-  cidFile: string;
-  url: string;
-};
+const pinata = new PinataSDK({
+  pinataJwt: PINATA_JWT,
+  pinataGateway: PINATA_GATEAWAY_BASE,
+});
 
 export default {
-  async uploadToPdf(
-    fileBuffer: Buffer,
-    fileName: string,
-    metadata: Record<string, any> = {},
-    network: string = PINATA.PRIVATE
-  ): Promise<TPinataResult> {
-    if (!PINATA_JWT) {
-      throw new Error("pinata jwt not found");
+  async uploadCertificate(file: Express.Multer.File) {
+    try {
+      const upload = await pinata.upload.private
+        .file(
+          new File([file.buffer], file.originalname, { type: file.mimetype })
+        )
+        .group(PINATA_GROUP);
+
+      const result = {
+        cid: upload.cid,
+        url: `https://${PINATA_GATEAWAY_BASE}/ipfs/${upload.cid}`,
+        size: upload.size,
+      };
+      return result;
+    } catch (error) {
+      const err = error as unknown as Error;
+      throw new Error(`pinata upload failed: ${err.message}`);
     }
-
-    const form = new FormData();
-    form.append("file", fileBuffer, { filename: fileName });
-    form.append("network", network);
-
-    const pinataMetadata: any = { name: fileName, keyvalues: metadata };
-    form.append("pinataMetadata", JSON.stringify(pinataMetadata));
-
-    const request = await axios.post(PINATA_URL, form, {
-      headers: { Authorization: `Bearer ${PINATA_JWT}`, ...form.getHeaders() },
-      maxBodyLength: Infinity,
-    });
-    const cidFile = request?.data?.IpfsHash;
-    if (!cidFile) {
-      throw new Error("failed upload to pinata (IpfsHash not found)");
-    }
-
-    return {
-      cidFile,
-      url: `${PINATA_GATEAWAY_BASE}/${cidFile}`,
-    };
   },
 };

@@ -36,15 +36,11 @@ const UserSchema = new Schema<IUser>(
 
 // collection peserta
 const PesertaSchema = new Schema<IPeserta>({
-  hashToefl: {
+  hash: {
     type: Schema.Types.String,
   },
-  cidCertificate: {
+  certificate: {
     type: Schema.Types.String,
-  },
-  isActivated: {
-    type: Schema.Types.Boolean,
-    default: false,
   },
 });
 
@@ -88,70 +84,6 @@ const TOEFLSchema = new Schema<ITOEFL>(
   },
   { timestamps: true }
 );
-
-// statics
-PesertaSchema.statics = {
-  getPesertaByActivated(isActivated: boolean) {
-    return this.aggregate([
-      { $match: { isActivated } },
-      {
-        $project: {
-          address: '$address',
-          fullName: '$fullName',
-          email: '$email',
-          isActivated: '$isActivated',
-        },
-      },
-      { $sort: { createdAt: -1 } },
-      { $limit: 10 },
-    ]);
-  },
-  getOverview() {
-    return this.aggregate([
-      {
-        $group: {
-          _id: null,
-          pesertaTotal: { $sum: 1 },
-          activatedPeserta: { $sum: { $cond: ['$isActivated', 1, 0] } },
-          notActivatedPeserta: { $sum: { $cond: ['$isActivated', 0, 1] } },
-        },
-      },
-      {
-        $project: {
-          statistics: {
-            pesertaTotal: '$pesertaTotal',
-            activatedPeserta: '$activatedPeserta',
-            notActivatedPeserta: '$notActivatedPeserta',
-          },
-        },
-      },
-      {
-        $lookup: {
-          from: 'users',
-          let: {},
-          pipeline: [
-            { $match: { isActivated: false } },
-            { $sort: { createdAt: -1 } },
-            { $limit: 10 },
-            {
-              $project: {
-                _id: 0,
-                address: '$address',
-                fullName: '$fullName',
-                email: '$email',
-                isActivated: '$isActivated',
-              },
-            },
-          ],
-          as: 'latestNotActivatedPeserta',
-        },
-      },
-    ]);
-  },
-  findToeflHashByAddress(address: string) {
-    return this.find({}).select('hashToefl -_id');
-  },
-};
 
 export default {
   user: UserSchema,

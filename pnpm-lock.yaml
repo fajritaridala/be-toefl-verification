@@ -38,6 +38,9 @@ importers:
       multer:
         specifier: ^2.0.2
         version: 2.0.2
+      pinata:
+        specifier: ^2.5.0
+        version: 2.5.0
       yup:
         specifier: ^1.6.1
         version: 1.6.1
@@ -657,6 +660,18 @@ packages:
   picomatch@2.3.1:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
+
+  pinata@2.5.0:
+    resolution: {integrity: sha512-zjjrEUbEqeAE3gqIOy1K8f4xq3CDDefCgRj6tMqn14gbclSYo014+HQcfcKAAstMUjYNDb1yYQjxmBImW2kxCw==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
 
   property-expr@2.0.6:
     resolution: {integrity: sha512-SVtmxhRE/CGkn3eZY1T6pC8Nln6Fr/lu1mKSgRud0eC73whjGfoAogbn78LkD8aFL0zz3bAFerKSnOl7NlErBA==}
@@ -1520,6 +1535,8 @@ snapshots:
   path-to-regexp@8.2.0: {}
 
   picomatch@2.3.1: {}
+
+  pinata@2.5.0: {}
 
   property-expr@2.0.6: {}
 

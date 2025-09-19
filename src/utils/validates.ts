@@ -19,13 +19,15 @@ const inputValidateSchema = Yup.object({
   email: Yup.string().email().required(),
   nim: Yup.string().required(),
   major: Yup.string().required(),
+  status: Yup.string().required(),
   dateTest: Yup.date()
     .default(() => new Date())
     .required(),
-  sessionTest: Yup.number().required(),
+  sessionTest: Yup.string().required(),
   listening: Yup.number().required(),
   reading: Yup.number().required(),
-  writing: Yup.number().required(),
+  swe: Yup.number().required(),
+  scoreTotal: Yup.number().required(),
 });
 
 const toeflValidateSchema = Yup.object({

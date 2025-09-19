@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import schema from "../utils/schemas";
 import { UserModel } from "../models/user.model";
 import { generateToken } from "../utils/jwt";
 import { ROLES } from "../utils/constant";
 import { IReqUser } from "../utils/interfaces";
+import { loginValidateSchema, registerValidateSchema } from "../utils/validates";
 
 type TLogin = {
   address: string;
@@ -21,9 +21,10 @@ export default {
     try {
       const { address } = req.body as unknown as TLogin;
 
-      await schema.login.validate({ address });
+      await loginValidateSchema.validate({ address });
 
       const existingUser = await UserModel.findOne({ address });
+      console.log(existingUser);
 
       if (existingUser) {
         const tokenJwt = generateToken({
@@ -58,16 +59,25 @@ export default {
       const { address, fullName, email, roleToken } =
         req.body as unknown as TRegister;
 
-      await schema.register.validate({
+      await registerValidateSchema.validate({
         address,
         fullName,
         email,
         roleToken,
       });
 
+      const existingAddress = await UserModel.findOne({ address });
+      if (existingAddress) {
+        throw new Error("address already registered");
+      }
+      const existingEmail = await UserModel.findOne({ email });
+      if (existingEmail) {
+        throw new Error("email already registered");
+      }
+
       // validasi role
       let role = ROLES.PESERTA;
-      if (roleToken == process.env.ADMIN_TOKEN) {
+      if (roleToken === process.env.ADMIN_TOKEN) {
         role = ROLES.ADMIN;
       }
 

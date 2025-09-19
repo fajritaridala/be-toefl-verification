@@ -1,6 +1,7 @@
 import { Types, Model } from 'mongoose';
 import { Request } from 'express';
 
+// blueprint user untuk di simpan ke database
 interface IUser {
   address: string;
   fullName: string;
@@ -10,13 +11,13 @@ interface IUser {
   UpdatedAt?: Date;
 }
 
-// Interface tambahan untuk peserta
+// blueprint tambahan untuk peserta
 interface IPeserta extends IUser {
-  hashToefl?: string;
-  cidCertificate?: string;
-  isActivated?: boolean;
+  hash?: string;
+  certificate?: string;
 }
 
+// blueprint untuk yg daftar tes TOEFL
 interface ITOEFL {
   address: string;
   fullName: string;
@@ -28,30 +29,7 @@ interface ITOEFL {
   testDate: Date;
 }
 
-interface IPesertaModel extends Model<IPeserta> {
-  getPesertaByActivated(isActivated: boolean): Promise<{
-    address: string;
-    fullName: string;
-    email: string;
-    isActivated: boolean;
-  }>;
-  getOverview(): Promise<{
-    statistics: {
-      totalPeserta: number;
-      activatedPeserta: number;
-      notActivatedPeserta: number;
-    };
-    latestNotActivatedPeserta: {
-      address: string;
-      fullName: string;
-      email: string;
-      isActivated: boolean;
-    };
-  }>;
-  findToeflHashByAddress(address: string): Promise<{
-    hashToefl: string;
-  }>;
-}
+// blueprint query pagination
 interface IPaginationQuery {
   page: number;
   limit: number;
@@ -64,16 +42,9 @@ interface IUserToken
   id?: Types.ObjectId;
 }
 
+// blueprint request
 interface IReqUser extends Request {
   user?: IUserToken;
 }
 
-export {
-  IUser,
-  IPeserta,
-  ITOEFL,
-  IPesertaModel,
-  IUserToken,
-  IReqUser,
-  IPaginationQuery,
-};
+export { IUser, IPeserta, ITOEFL, IUserToken, IReqUser, IPaginationQuery };
