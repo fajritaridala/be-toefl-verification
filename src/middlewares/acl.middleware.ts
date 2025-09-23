@@ -6,6 +6,8 @@ export default (roles: string[]) => {
     const role = req.user?.role;
 
     if (!role || !roles.includes(role)) {
+      console.log('Error in acl middleware')
+      console.log(req.user);
       return res.status(403).json({
         data: null,
         message: "Forbidden",

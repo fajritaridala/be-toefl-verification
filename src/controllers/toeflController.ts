@@ -1,11 +1,11 @@
-import { Response } from 'express';
-import { IPaginationQuery, IReqUser } from '../utils/interfaces';
-import { inputValidateSchema, toeflValidateSchema } from '../utils/validates';
-import { ToeflModel } from '../models/toefl.model';
-import { PINATA, STATUS } from '../utils/constant';
-import { generateHash } from '../utils/hashes';
-import { PesertaModel } from '../models/user.model';
-import uploader from '../utils/uploader';
+import { Response } from "express";
+import { IPaginationQuery, IReqUser } from "../utils/interfaces";
+import { inputValidateSchema, toeflValidateSchema } from "../utils/validates";
+import { ToeflModel } from "../models/toefl.model";
+import { PINATA, STATUS } from "../utils/constant";
+import { generateHash } from "../utils/hashes";
+import { PesertaModel } from "../models/user.model";
+import uploader from "../utils/uploader";
 
 type TRegister = {
   fullName: string;
@@ -35,8 +35,8 @@ export default {
       if (search) {
         Object.assign(query, {
           $or: [
-            { name: { $regex: search, $options: 'i' } },
-            { description: { $regex: search, $options: 'i' } },
+            { fullName: { $regex: search, $options: "i" } },
+            // { nim: { $regex: search, $options: 'i' } },
           ],
         });
       }
@@ -55,7 +55,7 @@ export default {
       };
 
       res.status(200).json({
-        message: 'data successfully received',
+        message: "data successfully received",
         data: result,
         pagination: pagination,
       });
@@ -88,13 +88,13 @@ export default {
 
       const existingAddress = await ToeflModel.findOne({ data });
       const existingEmail = await ToeflModel.findOne({ email });
-      if (existingAddress) throw new Error('address already registered');
-      if (existingEmail) throw new Error('email already register');
+      if (existingAddress) throw new Error("address already registered");
+      if (existingEmail) throw new Error("email already register");
 
       const result = await ToeflModel.create(data);
 
       res.status(201).json({
-        message: 'toefl register successfully',
+        message: "toefl register successfully",
         data: result,
       });
     } catch (error) {
@@ -113,7 +113,7 @@ export default {
       const peserta = await ToeflModel.findOne({ address });
       if (!peserta) {
         return res.status(404).json({
-          message: 'peserta not found',
+          message: "peserta not found",
           data: null,
         });
       }
@@ -148,7 +148,7 @@ export default {
       await ToeflModel.findOneAndUpdate(
         { address },
         {
-          $set: { status: 'selesai' },
+          $set: { status: "selesai" },
         }
       );
 
@@ -163,7 +163,7 @@ export default {
       };
 
       res.status(201).json({
-        message: 'success input data',
+        message: "success input data",
         data: result,
       });
     } catch (error) {
@@ -177,7 +177,7 @@ export default {
   async uploadCertificate(req: IReqUser, res: Response) {
     if (!req.file) {
       res.status(400).json({
-        message: 'file not found',
+        message: "file not found",
         data: null,
       });
     }
@@ -186,7 +186,7 @@ export default {
       const peserta = await ToeflModel.findOne({ address }).lean();
       if (!peserta) {
         res.status(404).json({
-          message: 'peserta not found',
+          message: "peserta not found",
           data: null,
         });
       }
@@ -208,7 +208,7 @@ export default {
       };
 
       res.status(201).json({
-        message: 'success upload certificate',
+        message: "success upload certificate",
         data: result,
       });
     } catch (error) {
