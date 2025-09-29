@@ -1,5 +1,5 @@
-import * as Yup from 'yup';
-import { STATUS } from './constant';
+import * as Yup from "yup";
+import { STATUS } from "./constant";
 
 // register schema
 const registerValidateSchema = Yup.object({
@@ -26,7 +26,7 @@ const inputValidateSchema = Yup.object({
   sessionTest: Yup.string().required(),
   listening: Yup.number().required(),
   reading: Yup.number().required(),
-  swe: Yup.number().required(),
+  structure: Yup.number().required(),
   scoreTotal: Yup.number().required(),
 });
 

@@ -1,9 +1,12 @@
 import { Request, Response } from "express";
 import { UserModel } from "../models/user.model";
-import { generateToken } from "../utils/jwt";
 import { ROLES } from "../utils/constant";
 import { IReqUser } from "../utils/interfaces";
-import { loginValidateSchema, registerValidateSchema } from "../utils/validates";
+import { generateToken } from "../utils/jwt";
+import {
+  loginValidateSchema,
+  registerValidateSchema,
+} from "../utils/validates";
 
 type TLogin = {
   address: string;

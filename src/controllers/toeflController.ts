@@ -1,11 +1,11 @@
 import { Response } from "express";
-import { IPaginationQuery, IReqUser } from "../utils/interfaces";
-import { inputValidateSchema, toeflValidateSchema } from "../utils/validates";
 import { ToeflModel } from "../models/toefl.model";
+import { PesertaModel } from "../models/user.model";
 import { PINATA, STATUS } from "../utils/constant";
 import { generateHash } from "../utils/hashes";
-import { PesertaModel } from "../models/user.model";
+import { IPaginationQuery, IReqUser } from "../utils/interfaces";
 import uploader from "../utils/uploader";
+import { inputValidateSchema, toeflValidateSchema } from "../utils/validates";
 
 type TRegister = {
   fullName: string;
@@ -17,7 +17,7 @@ type TRegister = {
 
 type TInput = {
   listening: number;
-  swe: number;
+  structure: number;
   reading: number;
 };
 
@@ -108,7 +108,7 @@ export default {
   async input(req: IReqUser, res: Response) {
     try {
       const { address } = req.params;
-      const { listening, swe, reading } = req.body as unknown as TInput;
+      const { listening, structure, reading } = req.body as unknown as TInput;
 
       const peserta = await ToeflModel.findOne({ address });
       if (!peserta) {
@@ -118,7 +118,7 @@ export default {
         });
       }
 
-      const scoreTotal = listening + swe + reading;
+      const scoreTotal = listening + structure + reading;
       const data = {
         address,
         fullName: peserta.fullName,
@@ -129,27 +129,26 @@ export default {
         sessionTest: peserta.sessionTest,
         testDate: peserta.testDate,
         listening,
-        swe,
+        structure,
         reading,
         scoreTotal,
       };
 
       await inputValidateSchema.validate(data);
-
       const hash = generateHash(data);
 
       await PesertaModel.findOneAndUpdate(
         { address },
         {
           $set: { hash },
-        }
+        },
       );
 
       await ToeflModel.findOneAndUpdate(
         { address },
         {
           $set: { status: "selesai" },
-        }
+        },
       );
 
       const updatedPeserta = await ToeflModel.findOne({ address });
@@ -192,13 +191,13 @@ export default {
       }
 
       const upload = await uploader.uploadCertificate(
-        req.file as Express.Multer.File
+        req.file as Express.Multer.File,
       );
       const { cid, url, size } = upload;
 
       await PesertaModel.findOneAndUpdate(
         { address },
-        { $set: { certificate: cid } }
+        { $set: { certificate: cid } },
       );
 
       const result = {
