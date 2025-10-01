@@ -8,17 +8,17 @@ import uploader from "../utils/uploader";
 import { inputValidateSchema, toeflValidateSchema } from "../utils/validates";
 
 type TRegister = {
-  fullName: string;
+  nama_lengkap: string;
   email: string;
-  nim: string;
-  major: string;
-  sessionTest: string;
+  nomor_induk_mahasiswa: string;
+  jurusan: string;
+  sesi_tes: string;
 };
 
 type TInput = {
-  listening: number;
-  structure: number;
-  reading: number;
+  nilai_listening: number;
+  nilai_structure: number;
+  nilai_reading: number;
 };
 
 type TFile = {
@@ -35,7 +35,7 @@ export default {
       if (search) {
         Object.assign(query, {
           $or: [
-            { fullName: { $regex: search, $options: "i" } },
+            { nama_lengkap: { $regex: search, $options: "i" } },
             // { nim: { $regex: search, $options: 'i' } },
           ],
         });
@@ -69,24 +69,24 @@ export default {
   },
   async register(req: IReqUser, res: Response) {
     try {
-      const { address } = req.params;
-      const { fullName, email, nim, major, sessionTest } =
+      const { address_peserta } = req.params;
+      const { nama_lengkap, email, nomor_induk_mahasiswa, jurusan, sesi_tes } =
         req.body as unknown as TRegister;
 
       const data = {
-        address,
-        fullName,
+        address_peserta,
+        nama_lengkap,
         email,
-        nim,
-        major,
-        sessionTest,
-        testDate: new Date(),
+        nomor_induk_mahasiswa,
+        jurusan,
+        sesi_tes,
+        tanggal_tes: new Date(),
         status: STATUS.BELUM_SELESAI,
       };
 
       await toeflValidateSchema.validate(data);
 
-      const existingAddress = await ToeflModel.findOne({ data });
+      const existingAddress = await ToeflModel.findOne({ address_peserta });
       const existingEmail = await ToeflModel.findOne({ email });
       if (existingAddress) throw new Error("address already registered");
       if (existingEmail) throw new Error("email already register");
@@ -107,10 +107,11 @@ export default {
   },
   async input(req: IReqUser, res: Response) {
     try {
-      const { address } = req.params;
-      const { listening, structure, reading } = req.body as unknown as TInput;
+      const { address_peserta } = req.params;
+      const { nilai_listening, nilai_structure, nilai_reading } =
+        req.body as unknown as TInput;
 
-      const peserta = await ToeflModel.findOne({ address });
+      const peserta = await ToeflModel.findOne({ address_peserta });
       if (!peserta) {
         return res.status(404).json({
           message: "peserta not found",
@@ -118,47 +119,47 @@ export default {
         });
       }
 
-      const scoreTotal = listening + structure + reading;
+      const nilai_total = nilai_listening + nilai_structure + nilai_reading;
       const data = {
-        address,
-        fullName: peserta.fullName,
+        address_peserta,
+        nama_lengkap: peserta.nama_lengkap,
         email: peserta.email,
-        nim: peserta.nim,
-        major: peserta.major,
+        nomor_induk_mahasiswa: peserta.nomor_induk_mahasiswa,
+        jurusan: peserta.jurusan,
         status: peserta.status,
-        sessionTest: peserta.sessionTest,
-        testDate: peserta.testDate,
-        listening,
-        structure,
-        reading,
-        scoreTotal,
+        sesi_tes: peserta.sesi_tes,
+        tanggal_tes: peserta.tanggal_tes,
+        nilai_listening,
+        nilai_structure,
+        nilai_reading,
+        nilai_total,
       };
 
       await inputValidateSchema.validate(data);
-      const hash = generateHash(data);
+      const toefl_hash = generateHash(data);
 
       await PesertaModel.findOneAndUpdate(
-        { address },
+        { address: address_peserta },
         {
-          $set: { hash },
+          $set: { toefl_hash },
         },
       );
 
       await ToeflModel.findOneAndUpdate(
-        { address },
+        { address_peserta },
         {
           $set: { status: "selesai" },
         },
       );
 
-      const updatedPeserta = await ToeflModel.findOne({ address });
+      const updatedPeserta = await ToeflModel.findOne({ address_peserta });
 
       const result = {
         peserta: {
           ...data,
           status: updatedPeserta?.status,
         },
-        hash,
+        toefl_hash,
       };
 
       res.status(201).json({
@@ -181,8 +182,8 @@ export default {
       });
     }
     try {
-      const { address } = req.params;
-      const peserta = await ToeflModel.findOne({ address }).lean();
+      const { address_peserta } = req.params;
+      const peserta = await ToeflModel.findOne({ address_peserta }).lean();
       if (!peserta) {
         res.status(404).json({
           message: "peserta not found",
@@ -196,7 +197,7 @@ export default {
       const { cid, url, size } = upload;
 
       await PesertaModel.findOneAndUpdate(
-        { address },
+        { address: address_peserta },
         { $set: { certificate: cid } },
       );
 

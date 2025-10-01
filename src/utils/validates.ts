@@ -14,30 +14,30 @@ const loginValidateSchema = Yup.object({
 });
 
 const inputValidateSchema = Yup.object({
-  address: Yup.string().required(),
-  fullName: Yup.string().required(),
+  address_peserta: Yup.string().required(),
+  nama_lengkap: Yup.string().required(),
   email: Yup.string().email().required(),
-  nim: Yup.string().required(),
-  major: Yup.string().required(),
+  nomor_induk_mahasiswa: Yup.string().required(),
+  jurusan: Yup.string().required(),
   status: Yup.string().required(),
-  dateTest: Yup.date()
+  sesi_tes: Yup.string().required(),
+  tanggal_tes: Yup.date()
     .default(() => new Date())
     .required(),
-  sessionTest: Yup.string().required(),
-  listening: Yup.number().required(),
-  reading: Yup.number().required(),
-  structure: Yup.number().required(),
-  scoreTotal: Yup.number().required(),
+  nilai_listening: Yup.number().required(),
+  nilai_reading: Yup.number().required(),
+  nilai_structure: Yup.number().required(),
+  nilai_total: Yup.number().required(),
 });
 
 const toeflValidateSchema = Yup.object({
-  address: Yup.string().required(),
-  fullName: Yup.string().required(),
+  address_peserta: Yup.string().required(),
+  nama_lengkap: Yup.string().required(),
   email: Yup.string().email().required(),
-  nim: Yup.string().required(),
-  major: Yup.string().required(),
-  sessionTest: Yup.string().required(),
-  testDate: Yup.date().default(new Date()).required(),
+  nomor_induk_mahasiswa: Yup.string().required(),
+  jurusan: Yup.string().required(),
+  sesi_tes: Yup.string().required(),
+  tanggal_tes: Yup.date().default(new Date()).required(),
   status: Yup.string().default(STATUS.BELUM_SELESAI).required(),
 });
 

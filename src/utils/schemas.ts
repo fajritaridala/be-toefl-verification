@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
-import { ROLES } from '../utils/constant';
-import { IUser, IPeserta, ITOEFL } from './interfaces';
+import mongoose from "mongoose";
+import { ROLES } from "../utils/constant";
+import { IPeserta, ITOEFL, IUser } from "./interfaces";
 
 const Schema = mongoose.Schema;
 
@@ -28,15 +28,15 @@ const UserSchema = new Schema<IUser>(
     },
   },
   {
-    discriminatorKey: 'role',
-    collection: 'users',
+    discriminatorKey: "role",
+    collection: "users",
     timestamps: true,
-  }
+  },
 );
 
 // collection peserta
 const PesertaSchema = new Schema<IPeserta>({
-  hash: {
+  toefl_hash: {
     type: Schema.Types.String,
   },
   certificate: {
@@ -47,12 +47,12 @@ const PesertaSchema = new Schema<IPeserta>({
 // toefl collection
 const TOEFLSchema = new Schema<ITOEFL>(
   {
-    address: {
+    address_peserta: {
       type: Schema.Types.String,
       required: true,
       unique: true,
     },
-    fullName: {
+    nama_lengkap: {
       type: Schema.Types.String,
       required: true,
     },
@@ -61,11 +61,11 @@ const TOEFLSchema = new Schema<ITOEFL>(
       required: true,
       unique: true,
     },
-    nim: {
+    nomor_induk_mahasiswa: {
       type: Schema.Types.String,
       required: true,
     },
-    major: {
+    jurusan: {
       type: Schema.Types.String,
       required: true,
     },
@@ -73,16 +73,16 @@ const TOEFLSchema = new Schema<ITOEFL>(
       type: Schema.Types.String,
       required: true,
     },
-    sessionTest: {
+    sesi_tes: {
       type: Schema.Types.String,
       required: true,
     },
-    testDate: {
+    tanggal_tes: {
       type: Schema.Types.Date,
       required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default {

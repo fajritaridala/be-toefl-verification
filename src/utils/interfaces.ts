@@ -13,20 +13,20 @@ interface IUser {
 
 // blueprint tambahan untuk peserta
 interface IPeserta extends IUser {
-  hash?: string;
+  toefl_hash?: string;
   certificate?: string;
 }
 
 // blueprint untuk yg daftar tes TOEFL
 interface ITOEFL {
-  address: string;
-  fullName: string;
+  address_peserta: string;
+  nama_lengkap: string;
   email: string;
-  nim: string;
-  major: string;
-  sessionTest: string;
+  nomor_induk_mahasiswa: string;
+  jurusan: string;
+  sesi_tes: string;
   status: string;
-  testDate: Date;
+  tanggal_tes: Date;
 }
 
 // blueprint query pagination
