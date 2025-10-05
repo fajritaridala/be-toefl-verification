@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
-import dbSchema from '../utils/schemas';
-import { ITOEFL } from '../utils/interfaces';
+import mongoose from "mongoose";
+import { ITOEFL } from "../utils/interfaces";
+import dbSchema from "../utils/schemas";
 
-export const ToeflModel = mongoose.model<ITOEFL>('toefl', dbSchema.toefl);
+export const ToeflModel = mongoose.model<ITOEFL>("toefls", dbSchema.toefl);

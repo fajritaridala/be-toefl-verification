@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { ToeflModel } from "../models/toefl.model";
 import { PesertaModel } from "../models/user.model";
-import { PINATA, STATUS } from "../utils/constant";
+import { STATUS } from "../utils/constant";
 import { generateHash } from "../utils/hashes";
 import { IPaginationQuery, IReqUser } from "../utils/interfaces";
 import uploader from "../utils/uploader";
@@ -9,9 +9,10 @@ import { inputValidateSchema, toeflValidateSchema } from "../utils/validates";
 
 type TRegister = {
   nama_lengkap: string;
-  email: string;
+  jenis_kelamin: string;
   nomor_induk_mahasiswa: string;
-  jurusan: string;
+  fakultas: string;
+  program_studi: string;
   sesi_tes: string;
 };
 
@@ -70,32 +71,52 @@ export default {
   async register(req: IReqUser, res: Response) {
     try {
       const { address_peserta } = req.params;
-      const { nama_lengkap, email, nomor_induk_mahasiswa, jurusan, sesi_tes } =
-        req.body as unknown as TRegister;
+      const {
+        nama_lengkap,
+        jenis_kelamin,
+        nomor_induk_mahasiswa,
+        fakultas,
+        program_studi,
+        sesi_tes,
+      } = req.body as unknown as TRegister;
 
-      const data = {
+      const result = {
         address_peserta,
         nama_lengkap,
-        email,
+        jenis_kelamin,
         nomor_induk_mahasiswa,
-        jurusan,
+        fakultas,
+        program_studi,
         sesi_tes,
-        tanggal_tes: new Date(),
+        tanggal_tes: Math.floor(Date.now() / 1000),
         status: STATUS.BELUM_SELESAI,
       };
 
-      await toeflValidateSchema.validate(data);
+      await toeflValidateSchema.validate(result);
 
       const existingAddress = await ToeflModel.findOne({ address_peserta });
-      const existingEmail = await ToeflModel.findOne({ email });
-      if (existingAddress) throw new Error("address already registered");
-      if (existingEmail) throw new Error("email already register");
+      const existingNIM = await ToeflModel.findOne({ nomor_induk_mahasiswa });
+      if (existingAddress) throw new Error("address peserta telah terdaftar");
+      if (existingNIM) throw new Error("NIM telah terdaftar");
+      const timestamp = result.tanggal_tes * 1000;
+      const date = new Date(timestamp);
 
-      const result = await ToeflModel.create(data);
+      const sendToDb = {
+        ...result,
+        tanggal_tes: date.toLocaleDateString("id-ID", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }),
+      };
+
+      await ToeflModel.create(sendToDb);
 
       res.status(201).json({
         message: "toefl register successfully",
-        data: result,
+        data: {
+          result,
+        },
       });
     } catch (error) {
       const err = error as unknown as Error;
@@ -123,10 +144,10 @@ export default {
       const data = {
         address_peserta,
         nama_lengkap: peserta.nama_lengkap,
-        email: peserta.email,
+        jenis_kelamin: peserta.jenis_kelamin,
         nomor_induk_mahasiswa: peserta.nomor_induk_mahasiswa,
-        jurusan: peserta.jurusan,
-        status: peserta.status,
+        fakultas: peserta.fakultas,
+        program_studi: peserta.program_studi,
         sesi_tes: peserta.sesi_tes,
         tanggal_tes: peserta.tanggal_tes,
         nilai_listening,
@@ -136,7 +157,9 @@ export default {
       };
 
       await inputValidateSchema.validate(data);
-      const toefl_hash = generateHash(data);
+      const hash = generateHash(data);
+      const toefl_hash = "0x" + hash;
+      console.log(toefl_hash);
 
       await PesertaModel.findOneAndUpdate(
         { address: address_peserta },
@@ -145,20 +168,8 @@ export default {
         },
       );
 
-      await ToeflModel.findOneAndUpdate(
-        { address_peserta },
-        {
-          $set: { status: "selesai" },
-        },
-      );
-
-      const updatedPeserta = await ToeflModel.findOne({ address_peserta });
-
       const result = {
-        peserta: {
-          ...data,
-          status: updatedPeserta?.status,
-        },
+        peserta: data,
         toefl_hash,
       };
 
@@ -195,6 +206,13 @@ export default {
         req.file as Express.Multer.File,
       );
       const { cid, url, size } = upload;
+
+      await ToeflModel.findOneAndUpdate(
+        { address_peserta },
+        {
+          $set: { status: "selesai" },
+        },
+      );
 
       await PesertaModel.findOneAndUpdate(
         { address: address_peserta },

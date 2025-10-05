@@ -59,6 +59,7 @@ export default {
 
   async register(req: Request, res: Response) {
     try {
+      console.log(req.body);
       const { address, fullName, email, roleToken } =
         req.body as unknown as TRegister;
 
@@ -84,6 +85,7 @@ export default {
         role = ROLES.ADMIN;
       }
 
+      console.log("hit");
       const result = await UserModel.create({
         address,
         fullName,

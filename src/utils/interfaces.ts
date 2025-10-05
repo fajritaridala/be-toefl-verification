@@ -1,5 +1,5 @@
-import { Types, Model } from 'mongoose';
-import { Request } from 'express';
+import { Request } from "express";
+import { Model, Types } from "mongoose";
 
 // blueprint user untuk di simpan ke database
 interface IUser {
@@ -21,12 +21,13 @@ interface IPeserta extends IUser {
 interface ITOEFL {
   address_peserta: string;
   nama_lengkap: string;
-  email: string;
+  jenis_kelamin: string;
   nomor_induk_mahasiswa: string;
-  jurusan: string;
+  fakultas: string;
+  program_studi: string;
   sesi_tes: string;
   status: string;
-  tanggal_tes: Date;
+  tanggal_tes: string;
 }
 
 // blueprint query pagination
@@ -38,7 +39,7 @@ interface IPaginationQuery {
 
 // Token jwt
 interface IUserToken
-  extends Omit<IUser, 'createdAt' | 'UpdatedAt' | 'fullName' | 'email'> {
+  extends Omit<IUser, "createdAt" | "UpdatedAt" | "fullName" | "email"> {
   id?: Types.ObjectId;
 }
 

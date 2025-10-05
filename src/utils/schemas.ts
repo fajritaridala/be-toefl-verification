@@ -56,16 +56,19 @@ const TOEFLSchema = new Schema<ITOEFL>(
       type: Schema.Types.String,
       required: true,
     },
-    email: {
+    jenis_kelamin: {
       type: Schema.Types.String,
       required: true,
-      unique: true,
     },
     nomor_induk_mahasiswa: {
       type: Schema.Types.String,
       required: true,
     },
-    jurusan: {
+    fakultas: {
+      type: Schema.Types.String,
+      required: true,
+    },
+    program_studi: {
       type: Schema.Types.String,
       required: true,
     },
@@ -78,7 +81,7 @@ const TOEFLSchema = new Schema<ITOEFL>(
       required: true,
     },
     tanggal_tes: {
-      type: Schema.Types.Date,
+      type: Schema.Types.String,
       required: true,
     },
   },
