@@ -26,8 +26,8 @@ export default {
 
       await loginValidateSchema.validate({ address });
 
-      const existingUser = await UserModel.findOne({ address });
-      console.log(existingUser);
+      const existingUser = await UserModel.findOne({ address }).lean();
+      // Avoid logging user documents to keep logs light and secure
 
       if (existingUser) {
         const tokenJwt = generateToken({
@@ -70,11 +70,11 @@ export default {
         roleToken,
       });
 
-      const existingAddress = await UserModel.findOne({ address });
+      const existingAddress = await UserModel.findOne({ address }).lean();
       if (existingAddress) {
         throw new Error("address already registered");
       }
-      const existingEmail = await UserModel.findOne({ email });
+      const existingEmail = await UserModel.findOne({ email }).lean();
       if (existingEmail) {
         throw new Error("email already registered");
       }
@@ -85,7 +85,7 @@ export default {
         role = ROLES.ADMIN;
       }
 
-      console.log("hit");
+      // Keep logs concise
       const result = await UserModel.create({
         address,
         fullName,

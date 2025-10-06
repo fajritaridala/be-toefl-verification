@@ -93,6 +93,9 @@ const TOEFLSchema = new Schema<ITOEFL>(
   { timestamps: true },
 );
 
+// Text index to speed up name searches
+TOEFLSchema.index({ nama_lengkap: "text" });
+
 export default {
   user: UserSchema,
   peserta: PesertaSchema,

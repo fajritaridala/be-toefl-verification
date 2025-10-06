@@ -1,0 +1,40 @@
+name: Runtime size and dependency audit
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.13.1
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+      - name: Type check & build
+        run: |
+          pnpm run build
+          du -sh dist || true
+      - name: Audit dependencies
+        run: |
+          pnpm audit --prod --json || true
+      - name: Fail on oversized dist
+        run: |
+          MAX_KB=2000
+          SIZE_KB=$(du -sk dist | awk '{print $1}')
+          echo "Built dist size: ${SIZE_KB} KB (limit ${MAX_KB} KB)"
+          if [ "$SIZE_KB" -gt "$MAX_KB" ]; then
+            echo "Dist exceeds size budget" >&2
+            exit 1
+          fi

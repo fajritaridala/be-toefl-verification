@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import bodyParser from "body-parser";
+import compression from "compression";
 import dotenv from "dotenv";
 import router from "./routes/api";
 import db from "./utils/database";
@@ -16,7 +16,8 @@ async function init() {
     const PORT = process.env.PORT;
 
     app.use(cors());
-    app.use(bodyParser.json());
+    app.use(compression());
+    app.use(express.json({ limit: "1mb" }));
     app.use("/api", router);
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}/api`);

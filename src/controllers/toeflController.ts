@@ -1,5 +1,5 @@
 import { Response } from "express";
-import moment from "moment";
+// Replaced heavy moment with native date helpers in utils/date
 import { ToeflModel } from "../models/toefl.model";
 import { PesertaModel } from "../models/user.model";
 import { STATUS } from "../utils/constant";
@@ -34,28 +34,30 @@ type TFile = {
 export default {
   async findAll(req: IReqUser, res: Response) {
     const { page, limit, search } = req.query as unknown as IPaginationQuery;
+    // sanitize pagination values
+    const safeLimit = Math.max(1, Math.min(Number(limit) || 10, 100));
+    const safePage = Math.max(1, Number(page) || 1);
     try {
       const query = {};
       if (search) {
         Object.assign(query, {
-          $or: [
-            { nama_lengkap: { $regex: search, $options: "i" } },
-            // { nim: { $regex: search, $options: 'i' } },
-          ],
+          $text: { $search: search },
         });
       }
-      const result = await ToeflModel.find(query)
-        .limit(limit)
-        .skip((page - 1) * limit)
-        .sort({ createdAt: -1 })
-        .exec();
-
-      const count = await ToeflModel.countDocuments(query);
+      const [result, count] = await Promise.all([
+        ToeflModel.find(query)
+          .limit(safeLimit)
+          .skip((safePage - 1) * safeLimit)
+          .sort({ createdAt: -1 })
+          .lean() // reduce memory and skip hydration
+          .exec(),
+        ToeflModel.countDocuments(query),
+      ]);
 
       const pagination = {
         total: count,
-        totalPages: Math.ceil(count / limit),
-        current: page,
+        totalPages: Math.ceil(count / safeLimit),
+        current: safePage,
       };
 
       res.status(200).json({
@@ -93,7 +95,7 @@ export default {
         fakultas,
         program_studi,
         sesi_tes,
-        tanggal_tes: moment().unix(),
+        tanggal_tes: Math.floor(Date.now() / 1000),
         status: STATUS.BELUM_SELESAI,
       };
 
@@ -138,7 +140,7 @@ export default {
       const { nilai_listening, nilai_structure, nilai_reading } =
         req.body as unknown as TInput;
 
-      const peserta = await ToeflModel.findOne({ address_peserta });
+      const peserta = await ToeflModel.findOne({ address_peserta }).lean();
       if (!peserta) {
         return res.status(404).json({
           message: "peserta not found",
