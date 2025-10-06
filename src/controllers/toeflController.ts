@@ -1,7 +1,9 @@
 import { Response } from "express";
+import moment from "moment";
 import { ToeflModel } from "../models/toefl.model";
 import { PesertaModel } from "../models/user.model";
 import { STATUS } from "../utils/constant";
+import date from "../utils/date";
 import { generateHash } from "../utils/hashes";
 import { IPaginationQuery, IReqUser } from "../utils/interfaces";
 import uploader from "../utils/uploader";
@@ -10,6 +12,7 @@ import { inputValidateSchema, toeflValidateSchema } from "../utils/validates";
 type TRegister = {
   nama_lengkap: string;
   jenis_kelamin: string;
+  tanggal_lahir: string;
   nomor_induk_mahasiswa: string;
   fakultas: string;
   program_studi: string;
@@ -74,6 +77,7 @@ export default {
       const {
         nama_lengkap,
         jenis_kelamin,
+        tanggal_lahir,
         nomor_induk_mahasiswa,
         fakultas,
         program_studi,
@@ -84,11 +88,12 @@ export default {
         address_peserta,
         nama_lengkap,
         jenis_kelamin,
+        tanggal_lahir,
         nomor_induk_mahasiswa,
         fakultas,
         program_studi,
         sesi_tes,
-        tanggal_tes: Math.floor(Date.now() / 1000),
+        tanggal_tes: moment().unix(),
         status: STATUS.BELUM_SELESAI,
       };
 
@@ -98,16 +103,16 @@ export default {
       const existingNIM = await ToeflModel.findOne({ nomor_induk_mahasiswa });
       if (existingAddress) throw new Error("address peserta telah terdaftar");
       if (existingNIM) throw new Error("NIM telah terdaftar");
-      const timestamp = result.tanggal_tes * 1000;
-      const date = new Date(timestamp);
+
+      // ubah Date() ke string
+      const tanggalTes = date.numberToString(result.tanggal_tes);
+
+      // ubah string ke Date()
+      const tanggalLahir = date.stringToNumber(result.tanggal_lahir);
 
       const sendToDb = {
         ...result,
-        tanggal_tes: date.toLocaleDateString("id-ID", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        }),
+        tanggal_tes: tanggalTes,
       };
 
       await ToeflModel.create(sendToDb);
@@ -115,7 +120,8 @@ export default {
       res.status(201).json({
         message: "toefl register successfully",
         data: {
-          result,
+          ...result,
+          tanggal_lahir: tanggalLahir,
         },
       });
     } catch (error) {
@@ -140,11 +146,14 @@ export default {
         });
       }
 
-      const nilai_total = nilai_listening + nilai_structure + nilai_reading;
-      const data = {
+      const nilai_total =
+        300 + nilai_listening + nilai_structure + nilai_reading;
+
+      const result = {
         address_peserta,
         nama_lengkap: peserta.nama_lengkap,
         jenis_kelamin: peserta.jenis_kelamin,
+        tanggal_lahir: peserta.tanggal_lahir,
         nomor_induk_mahasiswa: peserta.nomor_induk_mahasiswa,
         fakultas: peserta.fakultas,
         program_studi: peserta.program_studi,
@@ -156,10 +165,10 @@ export default {
         nilai_total,
       };
 
-      await inputValidateSchema.validate(data);
-      const hash = generateHash(data);
+      await inputValidateSchema.validate(result);
+
+      const hash = generateHash(result);
       const toefl_hash = "0x" + hash;
-      console.log(toefl_hash);
 
       await PesertaModel.findOneAndUpdate(
         { address: address_peserta },
@@ -168,14 +177,19 @@ export default {
         },
       );
 
-      const result = {
-        peserta: data,
-        toefl_hash,
-      };
+      const tanggalLahir = date.stringToNumber(result.tanggal_lahir);
+      const tanggalTes = date.stringToNumber(result.tanggal_tes);
 
       res.status(201).json({
         message: "success input data",
-        data: result,
+        data: {
+          peserta: {
+            ...result,
+            tanggal_tes: tanggalTes,
+            tanggal_lahir: tanggalLahir,
+          },
+          toefl_hash,
+        },
       });
     } catch (error) {
       const err = error as unknown as Error;

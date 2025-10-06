@@ -60,8 +60,13 @@ const TOEFLSchema = new Schema<ITOEFL>(
       type: Schema.Types.String,
       required: true,
     },
+    tanggal_lahir: {
+      type: Schema.Types.String,
+      required: true,
+    },
     nomor_induk_mahasiswa: {
       type: Schema.Types.String,
+      unique: true,
       required: true,
     },
     fakultas: {

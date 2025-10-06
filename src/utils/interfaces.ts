@@ -22,12 +22,17 @@ interface ITOEFL {
   address_peserta: string;
   nama_lengkap: string;
   jenis_kelamin: string;
+  tanggal_lahir: string;
   nomor_induk_mahasiswa: string;
   fakultas: string;
   program_studi: string;
   sesi_tes: string;
   status: string;
   tanggal_tes: string;
+}
+
+interface IInputTOEFL {
+  
 }
 
 // blueprint query pagination
