@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import { ROLES } from "../utils/constant";
-import { IPeserta, ITOEFL, IUser } from "./interfaces";
+import { ROLES } from "./constants";
+import { IPeserta, ITOEFL, IUser } from "./interface";
 
 const Schema = mongoose.Schema;
 

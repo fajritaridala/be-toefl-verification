@@ -1,11 +1,9 @@
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
-import dotenv from "dotenv";
-import router from "./routes/api";
+import router from "./routes";
 import db from "./utils/database";
-
-dotenv.config();
+import { PORT } from "./utils/env";
 
 async function init() {
   try {
@@ -13,7 +11,6 @@ async function init() {
     console.log(`Database status: ${dbConnection}`);
 
     const app = express();
-    const PORT = process.env.PORT;
 
     app.use(cors());
     app.use(bodyParser.json());

@@ -1,14 +1,19 @@
-import moment from "moment";
+import moment, { Moment } from "moment";
 
-function numberToString(date: number) {
-  return moment.unix(date).locale("id").format("D MMMM YYYY");
-}
+const isValidDate = (value: string | Moment) => {
+  return moment(value, "DD MMMM YYYY", "id", true);
+};
 
-function stringToNumber(date: string) {
-  return moment(date, "D MMMM YYYY", "id").unix();
+const stringToNumber = (date: string): number => {
+  return isValidDate(date).unix();
+};
+
+function numberToString(date: number): string {
+  return moment.unix(date).locale("id").format("DD MMMM YYYY");
 }
 
 export default {
   numberToString,
   stringToNumber,
+  isValidDate,
 };

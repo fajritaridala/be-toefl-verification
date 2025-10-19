@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
-import dbSchema from '../utils/schemas';
-import { IUser, IPeserta } from '../utils/interfaces';
-import { ROLES } from '../utils/constant';
+import dbSchema from '../utils/schema';
+import { IUser, IPeserta } from '../utils/interface';
+import { ROLES } from '../utils/constants';
 
 const UserModel = mongoose.model<IUser>('users', dbSchema.user);
 const PesertaModel = UserModel.discriminator<IPeserta>(
