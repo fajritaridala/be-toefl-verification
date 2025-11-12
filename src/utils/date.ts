@@ -1,19 +1,16 @@
 import moment, { Moment } from "moment";
 
-const isValidDate = (value: string | Moment) => {
-  return moment(value, "DD MMMM YYYY", "id", true);
+const validateDate = (date: string | Moment) => {
+  return moment(date, "DD-MM-YYYY", "id", true).isValid();
 };
 
-const stringToNumber = (date: string): number => {
-  return isValidDate(date).unix();
+const convertToDate = (date: string):number => {
+  const convert = new Date(date);
+  return moment(convert).valueOf();
 };
 
-function numberToString(date: number): string {
-  return moment.unix(date).locale("id").format("DD MMMM YYYY");
+function convertToString(date: number): string {
+  return moment.unix(date).locale("id").format("DD-MM-YYYY");
 }
 
-export default {
-  numberToString,
-  stringToNumber,
-  isValidDate,
-};
+export { convertToString, convertToDate, validateDate };

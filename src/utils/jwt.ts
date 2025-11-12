@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
-import { IUserToken } from "./interface";
 import { JWT_SECRET } from "./env";
+import { IUserToken } from "./interface";
 
 const generateToken = (user: IUserToken): string => {
   const token = jwt.sign(user, JWT_SECRET, {
-    expiresIn: "1h",
+    expiresIn: "1d",
   });
   return token;
 };

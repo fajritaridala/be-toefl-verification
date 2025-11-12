@@ -7,4 +7,5 @@ export default {
   uploadSingle(fieldName: string) {
     return upload.single(fieldName);
   },
+  
 };

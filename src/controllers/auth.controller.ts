@@ -1,55 +1,38 @@
 import { Request, Response } from "express";
 import { UserModel } from "../models/user.model";
 import { ROLES } from "../utils/constants";
-import { IReqUser } from "../utils/interface";
+import { IReqUser } from "../interfaces/auth.interface";
 import { generateToken } from "../utils/jwt";
 import response from "../utils/response";
-import {
-  loginValidateSchema,
-  registerValidateSchema,
-} from "../utils/validate";
-
-type TLogin = {
-  address: string;
-};
-
-type TRegister = TLogin & {
-  fullName: string;
-  email: string;
-  roleToken?: string;
-};
+import { loginValidateSchema, registerValidateSchema } from "../utils/validate";
 
 export default {
   async login(req: Request, res: Response) {
     try {
-      const body = await loginValidateSchema.validate(req.body as TLogin);
+      const body = await loginValidateSchema.validate(req.body);
       const { address } = body;
 
       const user = await UserModel.findOne({ address });
       if (!user) {
-        return response.error({
-          res,
-          message: "Address tidak ditemukan",
-          needsRegistration: true,
-          data: { address },
-        });
+        return response.success(res, address, "Address tidak ditemukan", true);
       }
 
       const jwt = generateToken({
+        _id: user._id,
         address: user.address,
         role: user.role,
       });
 
       response.success(res, jwt, "Login berhasil");
     } catch (error) {
-      response.error({ res, error, message: "Login gagal" });
+      response.error(res, error, "Login gagal");
     }
   },
 
   async register(req: Request, res: Response) {
     try {
-      const body = await registerValidateSchema.validate(req.body as TRegister);
-      const { address, fullName, email, roleToken } = body;
+      const body = await registerValidateSchema.validate(req.body);
+      const { address, username, email, roleToken } = body;
 
       const existingAddress = await UserModel.findOne({ address });
       if (existingAddress) throw new Error("Address telah terdaftar");
@@ -65,14 +48,14 @@ export default {
 
       const user = await UserModel.create({
         address,
-        fullName,
+        username,
         email,
         role,
       });
 
       const result = {
         address: user.address,
-        fullName: user.fullName,
+        username: user.username,
         email: user.email,
         role: user.role,
       };
@@ -95,14 +78,14 @@ export default {
 
       const result = {
         address: user.address,
-        fullName: user.fullName,
+        username: user.username,
         email: user.email,
         role: user.role,
       };
 
       response.success(res, result, "Data pengguna berhasil diperoleh");
     } catch (error) {
-      response.error({ res, error, message: "Gagal memperoleh data pengguna" });
+      response.error(res, error, "Gagal memperoleh data pengguna");
     }
   },
 };

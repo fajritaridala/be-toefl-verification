@@ -1,32 +1,92 @@
 import express, { Router } from "express";
-import toeflController from "../controllers/toefl.controller";
+import scheduleController from "../controllers/toefl/schedule.controller";
+// import toeflController from "../controllers/toefl.controller";
+import serviceController from "../controllers/toefl/service.controller";
 import aclMiddleware from "../middlewares/acl.middleware";
 import authMiddleware from "../middlewares/auth.middleware";
 import uploadMiddleware from "../middlewares/media.middleware";
 import { ROLES } from "../utils/constants";
+import mediaMiddleware from "../middlewares/media.middleware";
 
 const router: Router = express.Router();
 
-router.get("/", [
+// route layanan
+router.post("/service", [
   authMiddleware,
   aclMiddleware([ROLES.ADMIN]),
-  toeflController.findAll,
+  serviceController.create,
 ]);
-router.post("/:address_peserta/register", [
+router.get("/service", [
+  authMiddleware,
+  aclMiddleware([ROLES.ADMIN]),
+  serviceController.findAll,
+]);
+router.put("/service/:id", [
+  authMiddleware,
+  aclMiddleware([ROLES.ADMIN]),
+  serviceController.update,
+]);
+router.delete("/service/:id", [
+  authMiddleware,
+  aclMiddleware([ROLES.ADMIN]),
+  serviceController.remove,
+]);
+
+// route jadwal
+router.get("/schedule", [
+  authMiddleware,
+  aclMiddleware([ROLES.ADMIN]),
+  scheduleController.findAll,
+]);
+router.get("/schedule/:service_id", [
   authMiddleware,
   aclMiddleware([ROLES.PESERTA]),
-  toeflController.register,
+  scheduleController.findAllByService,
 ]);
-router.patch("/:address_peserta/input", [
+router.post("/schedule/:service_id", [
   authMiddleware,
   aclMiddleware([ROLES.ADMIN]),
-  toeflController.input,
+  scheduleController.create,
 ]);
-router.patch("/:address_peserta/upload-certificate", [
+router.patch("/schedule/:id", [
   authMiddleware,
-  aclMiddleware([ROLES.ADMIN]),
-  uploadMiddleware.uploadSingle("file"),
-  toeflController.uploadCertificate,
+  aclMiddleware([ROLES.PESERTA]),
+  mediaMiddleware.uploadSingle("file"),
+  scheduleController.register,
 ]);
+// route peserta
+
+// router.get("/", [
+//   authMiddleware,
+//   aclMiddleware([ROLES.ADMIN]),
+//   toeflController.findAll,
+// ]);
+
+// router.post("/schedule", [
+//   authMiddleware,
+//   aclMiddleware([ROLES.ADMIN]),
+//   toeflController.addSchedule,
+// ]);
+// router.post("/layanan", [
+//   authMiddleware,
+//   aclMiddleware([ROLES.ADMIN]),
+//   toeflController.addLayanan,
+// ]);
+// router.post("/:address_peserta/register", [
+//   authMiddleware,
+//   aclMiddleware([ROLES.PESERTA]),
+//   toeflController.register,
+// ]);
+// router.patch("/:address_peserta/input", [
+//   authMiddleware,
+//   aclMiddleware([ROLES.ADMIN]),
+//   toeflController.input,
+// ]);
+// router.patch("/:address_peserta/upload-certificate", [
+//   authMiddleware,
+//   aclMiddleware([ROLES.ADMIN]),
+//   uploadMiddleware.uploadSingle("file"),
+//   toeflController.uploadCertificate,
+// ]);
 
 export default router;

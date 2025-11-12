@@ -5,9 +5,7 @@ import * as Yup from "yup";
 type ErrorParams = {
   res: Response;
   message: string | Error;
-  error?: unknown;
-  data?: any;
-  needsRegistration?: boolean;
+  error: unknown;
 };
 
 type TPagination = {
@@ -24,30 +22,22 @@ type PaginationParams = {
 };
 
 export default {
-  success: (res: Response, data: any, message: string) => {
+  success: (
+    res: Response,
+    data: any,
+    message: string,
+    needsRegistration?: boolean,
+  ) => {
     return res.status(200).json({
       meta: {
         status: 200,
         message,
       },
       data,
+      needsRegistration,
     });
   },
-  error: (params: ErrorParams) => {
-    const { res, error, message, data = null, needsRegistration } = params;
-
-    // error dari registrasi akun
-    if (needsRegistration) {
-      res.status(400).json({
-        meta: {
-          status: 400,
-          message,
-          needsRegistration,
-        },
-        data,
-      });
-    }
-
+  error: (res: Response, error: unknown, message: string) => {
     // error dari Yup
     if (error instanceof Yup.ValidationError) {
       return res.status(400).json({
@@ -71,7 +61,9 @@ export default {
     }
 
     if ((error as any)?.code) {
+      console.log((error as any)?.code);
       const _err = error as any;
+      console.log(_err);
       return res.status(500).json({
         meta: {
           status: 500,
@@ -87,7 +79,7 @@ export default {
         status: 400,
         message,
       },
-      data,
+      data: null,
     });
   },
   unauthorized: (res: Response, message: string = "Unauthorized") => {

@@ -3,8 +3,7 @@ import authRoutes from "./auth.route";
 import toeflRoutes from "./toefl.route";
 
 const router: Router = express.Router();
-console.log("hit");
 router.use("/auth", authRoutes);
-router.use("/toefls", toeflRoutes);
+router.use("/toefl", toeflRoutes);
 
 export default router;

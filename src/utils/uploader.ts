@@ -1,5 +1,7 @@
-import { PinataSDK } from 'pinata';
-import { PINATA_GATEAWAY, PINATA_GROUP_PRIVATE, PINATA_JWT } from './env';
+import { v2 as cloudinary } from "cloudinary";
+import { PinataSDK } from "pinata";
+import { toDataURL } from "../config/cloudinary.config";
+import { PINATA_GATEAWAY, PINATA_GROUP_PRIVATE, PINATA_JWT } from "./env";
 
 const pinata = new PinataSDK({
   pinataJwt: PINATA_JWT,
@@ -28,5 +30,17 @@ export default {
       const err = error as unknown as Error;
       throw new Error(`pinata upload failed: ${err.message}`);
     }
+  },
+  async uploadImage(file: Express.Multer.File, fullName: string) {
+    console.log(file);
+    const fileDataUrl = toDataURL(file);
+    const filename_override = `bukti-pembayanan-${fullName}`;
+    const image = await cloudinary.uploader.upload(fileDataUrl, {
+      folder: "TOEFL/bukti-pembayaran",
+      filename_override,
+      resource_type: "auto",
+    });
+    const result = image.url;
+    return result;
   },
 };
