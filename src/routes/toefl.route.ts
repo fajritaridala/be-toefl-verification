@@ -31,29 +31,6 @@ router.delete("/service/:id", [
   aclMiddleware([ROLES.ADMIN]),
   serviceController.remove,
 ]);
-
-// route jadwal
-router.get("/schedule", [
-  authMiddleware,
-  aclMiddleware([ROLES.ADMIN]),
-  scheduleController.findAll,
-]);
-router.get("/schedule/:service_id", [
-  authMiddleware,
-  aclMiddleware([ROLES.PESERTA]),
-  scheduleController.findAllByService,
-]);
-router.post("/schedule/:service_id", [
-  authMiddleware,
-  aclMiddleware([ROLES.ADMIN]),
-  scheduleController.create,
-]);
-router.patch("/schedule/:id", [
-  authMiddleware,
-  aclMiddleware([ROLES.PESERTA]),
-  mediaMiddleware.uploadSingle("file"),
-  scheduleController.register,
-]);
 // route peserta
 
 // router.get("/", [

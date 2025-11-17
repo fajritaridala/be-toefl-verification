@@ -1,32 +1,27 @@
 // import { Response } from "express";
 // import moment from "moment";
+// import { ToeflModel } from "../models/toefl.model";
 // import { PesertaModel } from "../models/user.model";
-// import { STATUS, STATUS_KETERSEDIAAN } from "../utils/constants";
+// import { STATUS } from "../utils/constants";
 // import date from "../utils/date";
 // import { generateHash } from "../utils/hash";
 // import { IPaginationQuery, IReqUser } from "../utils/interface";
 // import response from "../utils/response";
 // import toeflConverter from "../utils/toeflConverter";
 // import uploader from "../utils/uploader";
-// import {
-//   addLayananValidateSchema,
-//   addScheduleValidateSchema,
-//   inputValidateSchema,
-//   toeflValidateSchema,
-// } from "../utils/validate";
+// import { inputValidateSchema, toeflValidateSchema } from "../utils/validate";
 
-// type TOEFLRegister = {
-//   jenis_tes: string;
+// type TRegister = {
 //   nama_lengkap: string;
 //   jenis_kelamin: string;
-//   tanggal_lahir: string;
+//   tanggal_lahir: Date;
 //   nomor_induk_mahasiswa: string;
 //   fakultas: string;
 //   program_studi: string;
 //   sesi_tes: string;
 // };
 
-// type TOEFLInput = {
+// type TInput = {
 //   nilai_listening: number;
 //   nilai_structure: number;
 //   nilai_reading: number;
@@ -51,12 +46,12 @@
 //       const exclude = "-_id -createdAt -updatedAt -__v";
 
 //       // mencari data berdasarkan hasil query
-      // const data = await ToeflModel.find(query)
-      //   .select(exclude)
-      //   .limit(limit)
-      //   .skip((page - 1) * limit)
-      //   .sort({ createdAt: -1 })
-      //   .exec();
+//       const data = await ToeflModel.find(query)
+//         .select(exclude)
+//         .limit(limit)
+//         .skip((page - 1) * limit)
+//         .sort({ createdAt: -1 })
+//         .exec();
 
 //       // menghitung jumlah data berdasarkan hasil query
 //       const count = await ToeflModel.countDocuments(query);
@@ -75,83 +70,21 @@
 //         message: "Data berhasil ditemukan",
 //       });
 //     } catch (error) {
-//       response.error(res, error, "Terjadi kesalahan saat mengambil data");
-//     }
-//   },
-//   async schedules(req: IReqUser, res: Response) {
-//     const { type } = req.query as unknown as { type: string };
-//     try {
-//     } catch (error) {}
-//   },
-//   async addSchedule(req: IReqUser, res: Response) {
-//     try {
-//       const body = await addScheduleValidateSchema.validate(req.body);
-
-//       const {
-//         tanggal_tes,
-//         waktu_mulai,
-//         waktu_selesai,
-//         lokasi,
-//         kuota_penuh,
-//       } = body;
-
-//       const newSchedule = {
-//         tanggal_tes,
-//         waktu_mulai,
-//         waktu_selesai,
-//         lokasi,
-//         kuota_penuh,
-//         jumlah_peserta: 0,
-//         status_ketersediaan: STATUS_KETERSEDIAAN.TERSEDIA,
-//       };
-
-//       await ToeflModel.updateOne(
-//         {},
-//         { $push: { jadwal: newSchedule } },
-//         { upsert: true },
-//       );
-
-//       response.success(res, newSchedule, "Jadwal berhasil ditambahkan");
-//     } catch (error) {
-//       const err = error as unknown as Error;
-//       response.error(res, error, err.message);
-//     }
-//   },
-//   async addLayanan(req: IReqUser, res: Response) {
-//     try {
-//       const body = await addLayananValidateSchema.validate(req.body);
-//       const { nama_layanan, deskripsi, harga, durasi } = body;
-
-//       const newLayanan = {
-//         nama_layanan,
-//         deskripsi,
-//         harga,
-//         durasi,
-//       };
-
-//       await ToeflModel.updateOne(
-//         {},
-//         { $push: { layanan: newLayanan } },
-//         { upsert: true },
-//       );
-
-//       response.success(res, newLayanan, "Layanan berhasil ditambahkan");
-//     } catch (error) {
-//       const err = error as unknown as Error;
-//       response.error(res, error, err.message);
+//       response.error({
+//         res,
+//         error,
+//         message: "Terjadi kesalahan saat mengambil data",
+//       });
 //     }
 //   },
 //   async register(req: IReqUser, res: Response) {
 //     try {
 //       // validasi inputan peserta
-//       const body = await toeflValidateSchema.validate(
-//         req.body as TOEFLRegister,
-//       );
+//       const body = await toeflValidateSchema.validate(req.body as TRegister);
 
 //       // mengambil data peserta dari parameter
 //       const { address_peserta } = req.params;
 //       const {
-//         jenis_tes,
 //         nama_lengkap,
 //         jenis_kelamin,
 //         tanggal_lahir,
@@ -161,10 +94,8 @@
 //         sesi_tes,
 //       } = body;
 
-//       const tanggal_tes = date.numberToString(moment().unix());
-
 //       // menyiapkan data peserta baru
-//       const TOEFLParticipantData = {
+//       const data = {
 //         address_peserta,
 //         nama_lengkap,
 //         jenis_kelamin,
@@ -173,35 +104,29 @@
 //         fakultas,
 //         program_studi,
 //         sesi_tes,
-//         tanggal_tes,
+//         tanggal_tes: date.numberToString(moment().unix()),
 //         status: STATUS.BELUM_SELESAI,
 //       };
 
-//       const TOEFLData = {
-//         jenis_tes,
-//         participants: [{ address_peserta, tanggal_tes }],
-//       };
-
 //       // mengecek peserta
-//       const tes = await ToeflModel.findOne({ jenis_tes });
+//       const user = await ToeflModel.findOne({
+//         $or: [{ address_peserta }, { nomor_induk_mahasiswa }],
+//       });
 
 //       // menolak peserta yang sudah terdaftar
-//       // if (participant) throw new Error("Pengguna telah terdaftar");
+//       if (user) throw new Error("Pengguna telah terdaftar");
 
 //       // menyimpan data peserta baru
-//       // await TOEFLParticipantModel.create(TOEFLParticipantData);
+//       await ToeflModel.create(data);
 
-//       // await ToeflModel.create(TOEFLData);
-
-//       // response.success(
-//       //   res,
-//       //   { TOEFLParticipantData, TOEFLData },
-//       //   "Pendaftaran TOEFL berhasil",
-//       // );
+//       response.success(res, data, "Pendaftaran TOEFL berhasil");
 //     } catch (error) {
 //       const err = error as unknown as Error;
-//       console.log(err.message);
-//       response.error(res, error, err.message);
+//       response.error({
+//         res,
+//         error,
+//         message: err.message,
+//       });
 //     }
 //   },
 //   async input(req: IReqUser, res: Response) {
@@ -209,12 +134,16 @@
 //       // menangkap data dari parameter
 //       const { address_peserta } = req.params;
 //       const { nilai_listening, nilai_structure, nilai_reading } =
-//         req.body as unknown as TOEFLInput;
+//         req.body as unknown as TInput;
 
 //       // mengecek apakah peserta sudah terdaftar
-//       const peserta = await TOEFLParticipantModel.findOne({ address_peserta });
+//       const peserta = await ToeflModel.findOne({ address_peserta });
 //       if (!peserta) {
-//         return response.error(res, null, "Peserta tidak ditemukan");
+//         return response.error({
+//           res,
+//           data: null,
+//           message: "Peserta tidak ditemukan",
+//         });
 //       }
 
 //       // menyiapkan nilai peserta
@@ -274,20 +203,30 @@
 //       });
 //     } catch (error) {
 //       const err = error as unknown as Error;
-//       response.error(res, error, err.message);
+//       response.error({
+//         res,
+//         error,
+//         message: err.message,
+//       });
 //     }
 //   },
 //   async uploadCertificate(req: IReqUser, res: Response) {
 //     // memastikan file ada
 //     if (!req.file) {
-//       return response.error(res, null, "File tidak ditemukan");
+//       return response.error({
+//         res,
+//         message: "File tidak ditemukan",
+//       });
 //     }
 //     try {
 //       // memastikan peserta ada
 //       const { address_peserta } = req.params;
 //       const peserta = await ToeflModel.findOne({ address_peserta }).lean();
 //       if (!peserta) {
-//         return response.error(res, null, "Peserta tidak ditemukan");
+//         return response.error({
+//           res,
+//           message: "Peserta tidak ditemukan",
+//         });
 //       }
 
 //       // melakukan upload sertifikat ke IPFS Pinata
@@ -322,7 +261,11 @@
 //       response.success(res, result, "Sertifikat berhasil diunggah");
 //     } catch (error) {
 //       const err = error as unknown as Error;
-//       response.error(res, error, err.message);
+//       response.error({
+//         res,
+//         error,
+//         message: err.message,
+//       });
 //     }
 //   },
 // };

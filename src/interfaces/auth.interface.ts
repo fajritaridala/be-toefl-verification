@@ -31,6 +31,7 @@ interface IPaginationQuery {
   page: number;
   limit: number;
   search?: string;
+  service_id?: string;
 }
 
 // Token jwt

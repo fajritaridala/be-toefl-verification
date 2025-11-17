@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { Model, Types } from "mongoose";
 
 // service interface
 interface IService {
@@ -22,14 +22,21 @@ interface IRegistrant {
   register_date: Date;
   payment_receipt: string;
   payment_date: Date;
-  status: string;
-  peserta_id: Types.ObjectId;
+  participant_id: Types.ObjectId;
+  status?: string;
   approved?: {
     by: string;
     date: Date;
   };
 }
 
+interface IHistoryResult {
+  service: string;
+  date: string;
+  status: string;
+}
+interface IStaticSchedule extends Model<IServiceSchedule> {
+  getParticipantHistory(participant_id: string): Promise<IHistoryResult[]>;
+}
 
-
-export { IService, IServiceSchedule };
+export { IService, IServiceSchedule, IStaticSchedule };

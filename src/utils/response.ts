@@ -56,14 +56,26 @@ export default {
           status: 500,
           message,
         },
-        data: error.name,
+        data: error,
       });
     }
 
     if ((error as any)?.code) {
-      console.log((error as any)?.code);
       const _err = error as any;
-      console.log(_err);
+      if (_err.code === 11000) {
+        const keys = Object.keys(_err.keyValue).join(" dan ");
+        const friendlyMessage = `Kombinasi ${keys} sudah terdaftar.`;
+
+        return res.status(409).json({
+          meta: {
+            status: 409,
+            message: friendlyMessage,
+          },
+          data: {
+            duplicatedFields: _err.keyValue,
+          },
+        });
+      }
       return res.status(500).json({
         meta: {
           status: 500,

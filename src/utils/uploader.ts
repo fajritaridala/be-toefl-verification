@@ -32,7 +32,6 @@ export default {
     }
   },
   async uploadImage(file: Express.Multer.File, fullName: string) {
-    console.log(file);
     const fileDataUrl = toDataURL(file);
     const filename_override = `bukti-pembayanan-${fullName}`;
     const image = await cloudinary.uploader.upload(fileDataUrl, {

@@ -1,5 +1,6 @@
+import mongoose from "mongoose";
 import * as yup from "yup";
-import { validateDate } from "../utils/date";
+import time from "../utils/date";
 
 // service validation
 const serviceValidation = {
@@ -25,16 +26,19 @@ const serviceValidation = {
       .required("Tanggal lahir harus diisi")
       .test("valid-date", (value) => {
         if (!value) return false;
-        return validateDate(value);
+        return time.validate(value);
       }),
     phone_number: yup.string().required("Nomor telepon harus diisi"),
     NIM: yup.string().required("Nomor Induk Mahasiswa harus diisi"),
     faculty: yup.string().required("Fakultas harus diisi"),
     major: yup.string().required("Jurusan harus diisi"),
-    payment_date: yup.string().required("Tanggal pembayaran harus diisi").test("valid-date", (value) => {
-      if (!value) return false;
-      return validateDate(value);
-    }),
+    payment_date: yup
+      .string()
+      .required("Tanggal pembayaran harus diisi")
+      .test("valid-date", (value) => {
+        if (!value) return false;
+        return time.validate(value);
+      }),
   }),
 };
 
@@ -47,9 +51,13 @@ const scheduleValidation = {
       .required("Tanggal jadwal harus diisi")
       .test("valid-date", (value) => {
         if (!value) return false;
-        return validateDate(value);
+        return time.validate(value);
       }),
     quota: yup.number(),
+  }),
+  findAll: yup.object({
+    id: yup.string(),
+    service_id: yup.string(),
   }),
 };
 

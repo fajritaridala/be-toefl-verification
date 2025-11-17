@@ -3,9 +3,10 @@ import multer from "multer";
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-export default {
+const mediaMiddleware = {
   uploadSingle(fieldName: string) {
     return upload.single(fieldName);
   },
-  
 };
+
+export default mediaMiddleware;

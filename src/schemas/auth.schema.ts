@@ -39,6 +39,7 @@ const PesertaSchema = new Schema<IPeserta>({
   hash: Schema.Types.String,
   certificate: Schema.Types.String,
   registration_data: {
+    _id: false,
     type: {
       fullName: Schema.Types.String,
       gender: Schema.Types.String,

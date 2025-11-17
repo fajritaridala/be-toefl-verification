@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { IReqUser } from "../utils/interface";
+import { IReqUser } from "../interfaces/auth.interface";
 import { getUserData } from "../utils/jwt";
 import response from "../utils/response";
 
-export default (req: Request, res: Response, next: NextFunction) => {
+const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   // Cek apakah ada token di header Authorization
   const authorization = req.headers?.authorization;
 
@@ -29,3 +29,5 @@ export default (req: Request, res: Response, next: NextFunction) => {
 
   next();
 };
+
+export default authMiddleware;

@@ -1,8 +1,11 @@
 import mongoose from "mongoose";
-import { IServiceSchedule } from "../../interfaces/toefl.interface";
-import { scheduleSchema } from "../../schemas/toefl.schema";
+import {
+  ISchedule,
+  IScheduleStatics,
+} from "../../interfaces/schedule.interface";
+import scheduleSchema from "../../schemas/schedule.schema";
 
-export const ScheduleModel = mongoose.model<IServiceSchedule>(
+export const ScheduleModel = mongoose.model<ISchedule, IScheduleStatics>(
   "schedules",
   scheduleSchema,
 );

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { IService, IServiceSchedule } from "../interfaces/toefl.interface";
+import { REGISTER_STATUS } from "../utils/constants";
 
 const Schema = mongoose.Schema;
 
@@ -48,10 +49,11 @@ const scheduleSchema = new Schema<IServiceSchedule>(
       default: 100,
     },
     registrants: {
+      _id: false,
       default: [],
       type: [
         {
-          peserta_id: {
+          participant_id: {
             type: Schema.Types.ObjectId,
             ref: "users",
             required: true,
@@ -66,7 +68,8 @@ const scheduleSchema = new Schema<IServiceSchedule>(
           },
           status: {
             type: Schema.Types.String,
-            required: true,
+            enum: REGISTER_STATUS,
+            default: REGISTER_STATUS.PENDING,
           },
           approved: {
             required: false,
@@ -86,6 +89,44 @@ const scheduleSchema = new Schema<IServiceSchedule>(
   },
   {
     timestamps: true,
+    statics: {
+      getParticipantHistory(participant_id: string) {
+        const p_id = new mongoose.Types.ObjectId(participant_id);
+        return this.aggregate([
+          { $match: { "registrants.participant_id": p_id } },
+          {
+            $lookup: {
+              from: "services",
+              localField: "service_id",
+              foreignField: "_id",
+              as: "service_info",
+            },
+          },
+          { $unwind: "$service_info" },
+          {
+            $project: {
+              _id: 0,
+              schedule_date: 1,
+              service_name: "$service_info.name",
+              registration: {
+                $filter: {
+                  input: "$registrants",
+                  as: "reg",
+                  cond: { $eq: ["$$reg.participant_id", p_id] },
+                },
+              },
+            },
+          },
+          {
+            $project: {
+              service: "$service_name",
+              date: "$schedule_date",
+              status: { $arrayElemAt: ["$registration.status", 0] },
+            },
+          },
+        ]);
+      },
+    },
   },
 );
 

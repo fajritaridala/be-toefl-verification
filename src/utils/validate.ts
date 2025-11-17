@@ -1,5 +1,5 @@
 import * as Yup from "yup";
-import { validateDate } from "./date";
+import time from "./date";
 
 // register schema
 const registerValidateSchema = Yup.object({
@@ -37,7 +37,7 @@ const toeflValidateSchema = Yup.object({
     .required("Tanggal lahir harus diisi")
     .test("is-date-valid", (value) => {
       if (!value) return true;
-      return validateDate(value);
+      return time.validate(value);
     }),
   nomor_induk_mahasiswa: Yup.string().required(
     "Nomor Induk Mahasiswa harus diisi",

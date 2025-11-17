@@ -1,8 +1,8 @@
 import { Response } from "express";
 import { Types } from "mongoose";
+import { IPaginationQuery, IReqUser } from "../../interfaces/auth.interface";
 import { IService } from "../../interfaces/toefl.interface";
 import { ServiceModel } from "../../models/toefl/service.model";
-import { IPaginationQuery, IReqUser } from "../../utils/interface";
 import response from "../../utils/response";
 import { serviceValidation } from "../../validates/toefl.validate";
 

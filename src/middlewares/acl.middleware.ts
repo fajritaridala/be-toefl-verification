@@ -1,7 +1,7 @@
 import { NextFunction, Response } from "express";
-import { IReqUser } from "../utils/interface";
+import { IReqUser } from "../interfaces/auth.interface";
 
-export default (roles: string[]) => {
+const aclMiddleware = (roles: string[]) => {
   return (req: IReqUser, res: Response, next: NextFunction) => {
     const role = req.user?.role;
 
@@ -17,3 +17,5 @@ export default (roles: string[]) => {
     next();
   };
 };
+
+export default aclMiddleware;
