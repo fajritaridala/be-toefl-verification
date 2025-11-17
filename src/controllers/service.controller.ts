@@ -1,13 +1,13 @@
 import { Response } from "express";
 import { Types } from "mongoose";
-import { IPaginationQuery, IReqUser } from "../../interfaces/auth.interface";
-import { IService } from "../../interfaces/toefl.interface";
-import { ServiceModel } from "../../models/toefl/service.model";
-import response from "../../utils/response";
-import { serviceValidation } from "../../validates/toefl.validate";
+import { IPaginationQuery, IReqUser } from "../interfaces/auth.interface";
+import { IService } from "../interfaces/service.interface";
+import { ServiceModel } from "../models/service.model";
+import response from "../utils/response";
+import { serviceValidation } from "../validates/schedule.validate";
 
 export default {
-  async create(req: IReqUser, res: Response) {
+  async createService(req: IReqUser, res: Response) {
     try {
       const body = await serviceValidation.create.validate(req.body);
       const data = await ServiceModel.create(body);
@@ -27,7 +27,7 @@ export default {
       response.error(res, error, error.message);
     }
   },
-  async findAll(req: IReqUser, res: Response) {
+  async listServices(req: IReqUser, res: Response) {
     const { page, limit, search } = req.query as unknown as IPaginationQuery;
     try {
       const query = {};
@@ -48,7 +48,7 @@ export default {
       response.error(res, error, error.message);
     }
   },
-  async update(req: IReqUser, res: Response) {
+  async updateService(req: IReqUser, res: Response) {
     try {
       const { id } = req.params as unknown as Types.ObjectId;
       const update = await serviceValidation.update.validate(req.body);
@@ -65,7 +65,7 @@ export default {
       response.error(res, error, error.message);
     }
   },
-  async remove(req: IReqUser, res: Response) {
+  async deleteService(req: IReqUser, res: Response) {
     try {
       const { id } = req.params as unknown as Types.ObjectId;
       const result = await ServiceModel.findOneAndDelete({ _id: id }).select(

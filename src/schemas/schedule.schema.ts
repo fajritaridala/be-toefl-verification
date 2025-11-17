@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 import type { PipelineStage, Types } from "mongoose";
+import { ScheduleRegistrantResult } from "../interfaces/result.interface";
 import {
-  ISchedule,
   IRegistrantScore,
+  ISchedule,
   ScheduleQueryOptions,
   ScheduleRegistrantsQueryOptions,
 } from "../interfaces/schedule.interface";
-import { ScheduleRegistrantResult } from "../interfaces/result.interface";
 import { REGISTER_STATUS } from "../utils/constants";
 
 const Schema = mongoose.Schema;
@@ -28,6 +28,44 @@ const registrantScoreSchema = new Schema(
     total: {
       type: Schema.Types.Number,
       required: true,
+    },
+  },
+  { _id: false },
+);
+
+const participantProfileSchema = new Schema(
+  {
+    fullName: {
+      type: Schema.Types.String,
+      required: false,
+    },
+    gender: {
+      type: Schema.Types.String,
+      required: false,
+    },
+    birthDate: {
+      type: Schema.Types.Date,
+      required: false,
+    },
+    phoneNumber: {
+      type: Schema.Types.String,
+      required: false,
+    },
+    nim: {
+      type: Schema.Types.String,
+      required: false,
+    },
+    faculty: {
+      type: Schema.Types.String,
+      required: false,
+    },
+    major: {
+      type: Schema.Types.String,
+      required: false,
+    },
+    email: {
+      type: Schema.Types.String,
+      required: false,
     },
   },
   { _id: false },
@@ -93,6 +131,10 @@ const scheduleSchema = new Schema<ISchedule>(
           },
           cid_certificate: {
             type: Schema.Types.String,
+            required: false,
+          },
+          participantProfile: {
+            type: participantProfileSchema,
             required: false,
           },
         },
@@ -306,53 +348,6 @@ const scheduleSchema = new Schema<ISchedule>(
 
         return this.aggregate(pipeline).exec();
       },
-      getAllParticipants(id: string) {
-        const pipeline: PipelineStage[] = [];
-        if (id && mongoose.Types.ObjectId.isValid(id)) {
-          const schedule_id = new mongoose.Types.ObjectId(id);
-          pipeline.push({ $match: { _id: schedule_id } });
-        }
-
-        pipeline.push(
-          { $unwind: "$registrants" },
-          {
-            $lookup: {
-              from: "users",
-              localField: "registrants.participant_id",
-              foreignField: "_id",
-              as: "participant",
-            },
-          },
-          { $unwind: "$participant" },
-          { $sort: { "registrants.register_date": 1 } },
-          {
-            $project: {
-              _id: 0,
-              register_date: "$registrants.register_date",
-              payment: {
-                receipt: "$registrants.payment_receipt",
-                date: "$registrants.payment_date",
-              },
-              participant: {
-                _id: "$participant._id",
-                fullName: "$participant.registration_data.fullName",
-                gender: "$participant.registration_data.gender",
-                birth_date: "$participant.registration_data.birth_date",
-                phone_number: "$participant.registration_data.phone_number",
-                NIM: "$participant.registration_data.NIM",
-                faculty: "$participant.registration_data.faculty",
-                major: "$participant.registration_data.major",
-              },
-              status: "$registrants.status",
-              approved: {
-                admin_id: "$registrants.approved.admin_id",
-                date: "$registrants.approved.date",
-              },
-            },
-          },
-        );
-        return this.aggregate(pipeline).exec();
-      },
       getRegistrants(options: ScheduleRegistrantsQueryOptions) {
         const { skip, limit, status, search } = options;
         const pipeline: PipelineStage[] = [
@@ -533,9 +528,30 @@ const scheduleSchema = new Schema<ISchedule>(
               localField: "registrants.participant_id",
               foreignField: "_id",
               as: "participant",
+              pipeline: [
+                {
+                  $project: {
+                    email: 1,
+                    profile: {
+                      fullName: "$registration_data.fullName",
+                      gender: "$registration_data.gender",
+                      birthDate: "$registration_data.birth_date",
+                      phoneNumber: "$registration_data.phone_number",
+                      nim: "$registration_data.NIM",
+                      faculty: "$registration_data.faculty",
+                      major: "$registration_data.major",
+                    },
+                  },
+                },
+              ],
             },
           },
-          { $unwind: "$participant" },
+          {
+            $unwind: {
+              path: "$participant",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
           {
             $lookup: {
               from: "services",
@@ -544,7 +560,12 @@ const scheduleSchema = new Schema<ISchedule>(
               as: "service",
             },
           },
-          { $unwind: "$service" },
+          {
+            $unwind: {
+              path: "$service",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
           {
             $project: {
               _id: 0,
@@ -556,13 +577,48 @@ const scheduleSchema = new Schema<ISchedule>(
               payment_date: "$registrants.payment_date",
               status: "$registrants.status",
               participant_id: "$registrants.participant_id",
-              fullName: "$participant.registration_data.fullName",
-              gender: "$participant.registration_data.gender",
-              birth_date: "$participant.registration_data.birth_date",
-              phone_number: "$participant.registration_data.phone_number",
-              NIM: "$participant.registration_data.NIM",
-              faculty: "$participant.registration_data.faculty",
-              major: "$participant.registration_data.major",
+              fullName: {
+                $ifNull: [
+                  "$registrants.participantProfile.fullName",
+                  "$participant.profile.fullName",
+                ],
+              },
+              gender: {
+                $ifNull: [
+                  "$registrants.participantProfile.gender",
+                  "$participant.profile.gender",
+                ],
+              },
+              birth_date: {
+                $ifNull: [
+                  "$registrants.participantProfile.birthDate",
+                  "$participant.profile.birthDate",
+                ],
+              },
+              phone_number: {
+                $ifNull: [
+                  "$registrants.participantProfile.phoneNumber",
+                  "$participant.profile.phoneNumber",
+                ],
+              },
+              NIM: {
+                $ifNull: [
+                  "$registrants.participantProfile.nim",
+                  "$participant.profile.nim",
+                ],
+              },
+              faculty: {
+                $ifNull: [
+                  "$registrants.participantProfile.faculty",
+                  "$participant.profile.faculty",
+                ],
+              },
+              major: {
+                $ifNull: [
+                  "$registrants.participantProfile.major",
+                  "$participant.profile.major",
+                ],
+              },
               approved: "$registrants.approved",
               scores: {
                 listening: "$registrants.scores.listening",
@@ -583,5 +639,8 @@ const scheduleSchema = new Schema<ISchedule>(
 );
 
 scheduleSchema.index({ service_id: 1, schedule_date: 1 }, { unique: true });
+scheduleSchema.index({ schedule_date: 1 });
+scheduleSchema.index({ "registrants.participant_id": 1 });
+scheduleSchema.index({ "registrants.status": 1, schedule_date: -1 });
 
 export default scheduleSchema;

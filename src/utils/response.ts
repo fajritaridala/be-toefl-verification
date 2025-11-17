@@ -1,6 +1,7 @@
 import { Response } from "express";
 import mongoose from "mongoose";
 import * as Yup from "yup";
+import { BaseException } from "../exceptions";
 
 type ErrorParams = {
   res: Response;
@@ -38,6 +39,17 @@ export default {
     });
   },
   error: (res: Response, error: unknown, message: string) => {
+    if (error instanceof BaseException) {
+      return res.status(error.statusCode).json({
+        meta: {
+          status: error.statusCode,
+          message: error.message,
+          code: error.code,
+        },
+        data: error.details ?? null,
+      });
+    }
+
     // error dari Yup
     if (error instanceof Yup.ValidationError) {
       return res.status(400).json({

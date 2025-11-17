@@ -5,8 +5,8 @@ import authMiddleware from "../middlewares/auth.middleware";
 const router: Router = express.Router();
 
 // Auth routes
-router.post("/register", authController.register);
-router.post("/login", authController.login);
-router.get("/me", authMiddleware, authController.me);
+router.post("/register", authController.registerUser);
+router.post("/login", authController.loginUser);
+router.get("/me", authMiddleware, authController.getProfile);
 
 export default router;

@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
+import { IReqUser } from "../interfaces/auth.interface";
 import { UserModel } from "../models/user.model";
 import { ROLES } from "../utils/constants";
-import { IReqUser } from "../interfaces/auth.interface";
 import { generateToken } from "../utils/jwt";
 import response from "../utils/response";
 import { loginValidateSchema, registerValidateSchema } from "../utils/validate";
 
 export default {
-  async login(req: Request, res: Response) {
+  async loginUser(req: Request, res: Response) {
     try {
       const body = await loginValidateSchema.validate(req.body);
       const { address } = body;
@@ -29,7 +29,7 @@ export default {
     }
   },
 
-  async register(req: Request, res: Response) {
+  async registerUser(req: Request, res: Response) {
     try {
       const body = await registerValidateSchema.validate(req.body);
       const { address, username, email, roleToken } = body;
@@ -70,7 +70,7 @@ export default {
     }
   },
 
-  async me(req: IReqUser, res: Response) {
+  async getProfile(req: IReqUser, res: Response) {
     try {
       const address = req.user?.address;
       const user = await UserModel.findOne({ address }).lean();

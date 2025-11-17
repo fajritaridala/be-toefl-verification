@@ -1,6 +1,16 @@
 node_modules
 .env
-createSecret.ts
-peserta.ts
-coba.ts
 .idea
+.factory
+
+# Build output
+dist
+build
+
+# Test files (if created in root)
+*.test.ts
+*.spec.ts
+
+# OS files
+.DS_Store
+Thumbs.db

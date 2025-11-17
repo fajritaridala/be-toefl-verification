@@ -1,9 +1,8 @@
 import { Model, Types } from "mongoose";
 import {
-  AllParticipantsResult,
   HistoryResult,
-  ScheduleRegistrantResult,
   ScheduleRegisterResult,
+  ScheduleRegistrantResult,
   ScheduleResult,
 } from "./result.interface";
 
@@ -26,6 +25,18 @@ interface IRegistrants {
   };
   scores?: IRegistrantScore;
   cid_certificate?: string;
+  participantProfile?: IParticipantProfile;
+}
+
+interface IParticipantProfile {
+  fullName?: string;
+  gender?: string;
+  birthDate?: Date;
+  phoneNumber?: string;
+  nim?: string;
+  faculty?: string;
+  major?: string;
+  email?: string;
 }
 
 interface ISchedule {
@@ -57,7 +68,6 @@ interface IScheduleStatics extends Model<ISchedule> {
   getScheduleRegister(
     options?: ScheduleQueryOptions,
   ): Promise<ScheduleRegisterResult[]>;
-  getAllParticipants(schedule_id: string): Promise<AllParticipantsResult[]>;
   getRegistrants(
     options: ScheduleRegistrantsQueryOptions,
   ): Promise<ScheduleRegistrantResult[]>;
@@ -82,6 +92,7 @@ export {
   IScheduleStatics,
   IRegistrants,
   IRegistrantScore,
+  IParticipantProfile,
   ScheduleQueryOptions,
   ScheduleRegistrantsQueryOptions,
 };

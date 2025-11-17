@@ -36,24 +36,6 @@ interface ScheduleRegisterResult {
   schedules: ScheduleRegisterItem[];
 }
 
-interface AllParticipantsResult {
-  register_date: Date;
-  payment_receipt: string;
-  payment_date: Date;
-  status: string;
-  fullName: string;
-  gender: string;
-  birth_date: Date;
-  phone_number: string;
-  NIM: string;
-  faculty: string;
-  major: string;
-  approved?: {
-    admin_id: Types.ObjectId;
-    date: Date;
-  };
-}
-
 interface ScheduleRegistrantResult {
   schedule_id: ObjectId;
   service_name: string;
@@ -88,6 +70,5 @@ export {
   ScheduleResult,
   ScheduleRegisterItem,
   ScheduleRegisterResult,
-  AllParticipantsResult,
   ScheduleRegistrantResult,
 };
