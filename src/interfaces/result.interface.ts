@@ -2,9 +2,16 @@ import { ObjectId, Types } from "mongoose";
 import { IRegistrants } from "./schedule.interface";
 
 interface HistoryResult {
-  service: string;
-  date: string;
+  service_name: string;
+  schedule_date: Date;
   status: string;
+  cid_certificate?: string;
+  scores?: {
+    listening: number;
+    reading: number;
+    writing: number;
+    total: number;
+  };
 }
 
 interface ScheduleResult {
@@ -47,10 +54,40 @@ interface AllParticipantsResult {
   };
 }
 
+interface ScheduleRegistrantResult {
+  schedule_id: ObjectId;
+  service_name: string;
+  schedule_date: Date;
+  register_date: Date;
+  payment_receipt: string;
+  payment_date: Date;
+  status: string;
+  participant_id: ObjectId;
+  fullName: string;
+  gender: string;
+  birth_date: Date;
+  phone_number: string;
+  NIM: string;
+  faculty: string;
+  major: string;
+  approved?: {
+    admin_id: Types.ObjectId;
+    date: Date;
+  };
+  scores?: {
+    listening: number;
+    reading: number;
+    writing: number;
+    total: number;
+  };
+  cid_certificate?: string;
+}
+
 export {
   HistoryResult,
   ScheduleResult,
   ScheduleRegisterItem,
   ScheduleRegisterResult,
   AllParticipantsResult,
+  ScheduleRegistrantResult,
 };

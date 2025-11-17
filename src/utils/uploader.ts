@@ -42,4 +42,20 @@ export default {
     const result = image.url;
     return result;
   },
+  async uploadParticipantJson(data: Record<string, unknown>) {
+    try {
+      const uploadPrivate = await pinata.upload.private
+        .json(data)
+        .group(PINATA_GROUP_PRIVATE);
+
+      // const uploadPublic = await pinata.upload.public.json(data);
+
+      return {
+        cid: uploadPrivate.cid,
+      };
+    } catch (error) {
+      const err = error as Error;
+      throw new Error(`pinata upload failed: ${err.message}`);
+    }
+  },
 };

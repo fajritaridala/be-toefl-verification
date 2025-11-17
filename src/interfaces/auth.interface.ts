@@ -12,7 +12,7 @@ interface IUser {
 
 interface IPeserta extends IUser {
   hash?: string;
-  certificate?: string;
+  cid_certificate?: string;
   registration_data?: DataPendaftaran;
 }
 
@@ -46,4 +46,11 @@ interface IReqUser extends Request {
   user?: IUserToken;
 }
 
-export { IUser, IPeserta, DataPendaftaran, IUserToken, IReqUser, IPaginationQuery };
+export {
+  IUser,
+  IPeserta,
+  DataPendaftaran,
+  IUserToken,
+  IReqUser,
+  IPaginationQuery,
+};

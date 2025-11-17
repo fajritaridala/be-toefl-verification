@@ -30,13 +30,4 @@ interface IRegistrant {
   };
 }
 
-interface IHistoryResult {
-  service: string;
-  date: string;
-  status: string;
-}
-interface IStaticSchedule extends Model<IServiceSchedule> {
-  getParticipantHistory(participant_id: string): Promise<IHistoryResult[]>;
-}
-
-export { IService, IServiceSchedule, IStaticSchedule };
+export { IService, IServiceSchedule };

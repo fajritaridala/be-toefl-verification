@@ -15,6 +15,24 @@ router.post("/", [
   scheduleController.create,
 ]);
 
+router.get("/registrants", [
+  authMiddleware,
+  aclMiddleware([ROLES.ADMIN]),
+  scheduleController.findRegistrants,
+]);
+
+router.get("/history", [
+  authMiddleware,
+  aclMiddleware([ROLES.PESERTA]),
+  scheduleController.getHistory,
+]);
+
+router.patch("/:schedule_id/registrants/:participant_id", [
+  authMiddleware,
+  aclMiddleware([ROLES.ADMIN]),
+  scheduleController.setRegistrantScore,
+]);
+
 router.get("/:id/participants", [
   authMiddleware,
   aclMiddleware([ROLES.ADMIN]),

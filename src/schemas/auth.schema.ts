@@ -37,7 +37,7 @@ const UserSchema = new Schema<IUser>(
 // collection peserta
 const PesertaSchema = new Schema<IPeserta>({
   hash: Schema.Types.String,
-  certificate: Schema.Types.String,
+  cid_certificate: Schema.Types.String,
   registration_data: {
     _id: false,
     type: {

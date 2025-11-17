@@ -2,18 +2,15 @@ import { Response } from "express";
 import mongoose, { isValidObjectId } from "mongoose";
 import { DataPendaftaran } from "../../interfaces/auth.interface";
 import { IPaginationQuery, IReqUser } from "../../interfaces/auth.interface";
-import { ScheduleResult } from "../../interfaces/result.interface";
-import {
-  ISchedule,
-  ScheduleQueryOptions,
-} from "../../interfaces/schedule.interface";
-import { IServiceSchedule } from "../../interfaces/toefl.interface";
+import { ISchedule, ScheduleQueryOptions } from "../../interfaces/schedule.interface";
 import { ScheduleModel } from "../../models/toefl/schedule.model";
 import { PesertaModel } from "../../models/user.model";
 import { ROLES } from "../../utils/constants";
 import time from "../../utils/date";
 import response from "../../utils/response";
 import uploader from "../../utils/uploader";
+import { generateHash } from "../../utils/hash";
+import toeflConverter from "../../utils/toeflConverter";
 import {
   scheduleValidation,
   serviceValidation,
@@ -77,6 +74,155 @@ export default {
           : await ScheduleModel.getScheduleRegister(options);
 
       response.success(res, result, "Jadwal berhasil ditemukan");
+    } catch (err) {
+      const error = err as Error;
+      response.error(res, error, error.message);
+    }
+  },
+  async findRegistrants(req: IReqUser, res: Response) {
+    try {
+      const { page, limit, status, search } =
+        await scheduleValidation.registrants.validate(req.query);
+
+      const result = await ScheduleModel.getRegistrants({
+        skip: (page - 1) * limit,
+        limit,
+        status,
+        search,
+      });
+
+      response.success(res, result, "Pendaftar berhasil ditemukan");
+    } catch (err) {
+      const error = err as Error;
+      response.error(res, error, error.message);
+    }
+  },
+  async setRegistrantScore(req: IReqUser, res: Response) {
+    try {
+      const { schedule_id, participant_id } =
+        await scheduleValidation.scoreParams.validate(req.params);
+      const { listening, reading, writing } =
+        await scheduleValidation.scoreInput.validate(req.body);
+
+      const converted = toeflConverter({
+        nilai_listening: listening,
+        nilai_structure: writing,
+        nilai_reading: reading,
+      });
+
+      const baseScores = {
+        listening: converted.listening,
+        reading: converted.reading,
+        writing: converted.structure,
+        total: converted.nilai_total,
+      };
+
+      await ScheduleModel.setRegistrantScores(
+        schedule_id,
+        participant_id,
+        baseScores,
+      );
+
+      const registrant = await ScheduleModel.getRegistrantDetail(
+        schedule_id,
+        participant_id,
+      );
+
+      if (!registrant) {
+        return response.error(
+          res,
+          null,
+          "Registrasi peserta tidak ditemukan",
+        );
+      }
+
+      const normalizeScores = (input: typeof baseScores | undefined) => {
+        if (!input) return baseScores;
+        const { listening: l, reading: r, writing: w, total: t } = input;
+        return {
+          listening: l,
+          reading: r,
+          writing: w,
+          total: t,
+        };
+      };
+
+      const sanitizedScores = normalizeScores(registrant.scores);
+
+      const payload: Record<string, unknown> = {
+        schedule: {
+          id: registrant.schedule_id.toString(),
+          service_name: registrant.service_name,
+          schedule_date: registrant.schedule_date,
+        },
+        registrant: {
+          participant_id: registrant.participant_id.toString(),
+          fullName: registrant.fullName,
+          gender: registrant.gender,
+          birth_date: registrant.birth_date,
+          phone_number: registrant.phone_number,
+          NIM: registrant.NIM,
+          faculty: registrant.faculty,
+          major: registrant.major,
+          register_date: registrant.register_date,
+          payment_receipt: registrant.payment_receipt,
+          payment_date: registrant.payment_date,
+          status: registrant.status,
+          approved: registrant.approved ?? null,
+        },
+        scores: sanitizedScores,
+      };
+
+      const upload = await uploader.uploadParticipantJson(payload);
+      const cidHash = generateHash({ cid: upload.cid });
+
+      const formatDate = (value: unknown) =>
+        value instanceof Date ? value.toISOString() : value;
+
+      const finalScores = sanitizedScores;
+
+      const certificateData = {
+        fullName: registrant.fullName,
+        gender: registrant.gender,
+        birth_date: formatDate(registrant.birth_date),
+        major: registrant.major,
+        faculty: registrant.faculty,
+        NIM: registrant.NIM,
+        scores: finalScores,
+        exam_date: formatDate(registrant.schedule_date),
+        test_type: registrant.service_name,
+      };
+
+      await ScheduleModel.setRegistrantCidCertificate(
+        schedule_id,
+        participant_id,
+        cidHash,
+      );
+
+      response.success(
+        res,
+        {
+          hash: cidHash,
+          certificate_data: certificateData,
+        },
+        "Nilai berhasil disimpan",
+      );
+    } catch (err) {
+      const error = err as Error;
+      response.error(res, error, error.message);
+    }
+  },
+  async getHistory(req: IReqUser, res: Response) {
+    try {
+      const participantId = req.user?._id?.toString();
+
+      if (!participantId) {
+        return response.error(res, null, "Pengguna tidak valid");
+      }
+
+      const history = await ScheduleModel.getParticipantHistory(participantId);
+
+      response.success(res, history, "Riwayat pendaftaran berhasil ditemukan");
     } catch (err) {
       const error = err as Error;
       response.error(res, error, error.message);
