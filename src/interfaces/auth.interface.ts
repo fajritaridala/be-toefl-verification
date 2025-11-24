@@ -28,8 +28,8 @@ interface DataPendaftaran {
 
 // blueprint query pagination
 interface IPaginationQuery {
-  page: number;
-  limit: number;
+  page?: number;
+  limit?: number;
   search?: string;
   service_id?: string;
 }
@@ -43,7 +43,7 @@ interface IUserToken {
 
 // blueprint request
 interface IReqUser extends Request {
-  user?: IUserToken;
+  user?: IUserToken | undefined;
 }
 
 export {

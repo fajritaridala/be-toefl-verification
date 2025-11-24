@@ -1,13 +1,16 @@
 import { Router } from "express";
 import scheduleController from "../controllers/schedule.controller";
 import aclMiddleware from "../middlewares/acl.middleware";
-import authMiddleware from "../middlewares/auth.middleware";
+import {
+  authMiddleware,
+  optionalAuthMiddleware,
+} from "../middlewares/auth.middleware";
 import mediaMiddleware from "../middlewares/media.middleware";
 import { ROLES } from "../utils/constants";
 
 const router: Router = Router();
 
-router.get("/", [authMiddleware, scheduleController.listSchedules]);
+router.get("/", [optionalAuthMiddleware, scheduleController.listSchedules]);
 
 router.post("/", [
   authMiddleware,
@@ -21,7 +24,7 @@ router.get("/:scheduleId/participants", [
   scheduleController.listScheduleParticipants,
 ]);
 
-router.post("/:scheduleId/participants", [
+router.patch("/:scheduleId/participants", [
   authMiddleware,
   aclMiddleware([ROLES.PESERTA]),
   mediaMiddleware.uploadSingle("file"),

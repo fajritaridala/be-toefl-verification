@@ -28,7 +28,11 @@ export default {
     }
   },
   async listServices(req: IReqUser, res: Response) {
-    const { page, limit, search } = req.query as unknown as IPaginationQuery;
+    const {
+      page = 1,
+      limit = 10,
+      search,
+    } = req.query as unknown as IPaginationQuery;
     try {
       const query = {};
       if (search) {

@@ -53,6 +53,8 @@ interface ScheduleQueryOptions {
   skip?: number;
   limit?: number;
   status?: string;
+  role?: string;
+  minDate?: Date;
 }
 
 interface ScheduleRegistrantsQueryOptions {

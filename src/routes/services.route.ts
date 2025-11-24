@@ -1,7 +1,7 @@
 import express, { Router } from "express";
 import serviceController from "../controllers/service.controller";
 import aclMiddleware from "../middlewares/acl.middleware";
-import authMiddleware from "../middlewares/auth.middleware";
+import { authMiddleware } from "../middlewares/auth.middleware";
 import { ROLES } from "../utils/constants";
 
 const router: Router = express.Router();
@@ -12,9 +12,9 @@ router.post("/", [
   serviceController.createService,
 ]);
 
-router.get("/", [authMiddleware, serviceController.listServices]);
+router.get("/", serviceController.listServices);
 
-router.put("/:id", [
+router.patch("/:id", [
   authMiddleware,
   aclMiddleware([ROLES.ADMIN]),
   serviceController.updateService,

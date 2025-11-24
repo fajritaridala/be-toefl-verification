@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import type { PipelineStage, Types } from "mongoose";
+import { ROLES } from "../constants";
 import { ScheduleRegistrantResult } from "../interfaces/result.interface";
 import {
   IRegistrantScore,
@@ -189,160 +190,204 @@ const scheduleSchema = new Schema<ISchedule>(
         return this.aggregate(pipeline).exec();
       },
       getSchedule(options: ScheduleQueryOptions = {}) {
-        const { service_id, search, skip, limit } = options;
+        const { service_id, search, skip, limit, role, minDate } = options;
         const pipeline: PipelineStage[] = [];
 
-        if (service_id) pipeline.push({ $match: { service_id: service_id } });
+        if (service_id) {
+          pipeline.push({
+            $match: {
+              service_id: service_id,
+            },
+          });
+        }
+
         pipeline.push(
           {
             $lookup: {
               from: "services",
               localField: "service_id",
               foreignField: "_id",
-              as: "service_info",
+              as: "service_id",
             },
           },
-          { $unwind: "$service_info" },
+          {
+            $unwind: {
+              path: "$service_id",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
         );
 
-        if (search) {
+        if (role === ROLES.ADMIN) {
           pipeline.push(
             {
-              $addFields: {
-                schedule_date_text: {
-                  $dateToString: {
-                    date: "$schedule_date",
-                    format: "%Y-%m-%d",
+              $unwind: {
+                path: "$registrants",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $lookup: {
+                from: "users",
+                localField: "registrants.participant_id",
+                foreignField: "_id",
+                as: "registrants.participant_id",
+              },
+            },
+            {
+              $unwind: {
+                path: "$registrants.participant_id",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+          );
+          if (search) {
+            pipeline.push(
+              {
+                $addFields: {
+                  schedule_date_str: {
+                    $dateToString: {
+                      format: "%Y-%m-%d",
+                      date: "$schedule_date",
+                    },
+                  },
+                },
+              },
+              {
+                $match: {
+                  $or: [
+                    { schedule_date_str: { $regex: search, $options: "i" } },
+                    { "service_id.name": { $regex: search, $options: "i" } },
+                    {
+                      "registrants.participant_id.registration_data.fullName": {
+                        $regex: search,
+                        $options: "i",
+                      },
+                    },
+                  ],
+                },
+              },
+            );
+          }
+
+          pipeline.push(
+            {
+              $sort: { schedule_date: 1 },
+            },
+            {
+              $group: {
+                _id: "$_id",
+                schedule_date: { $first: "$schedule_date" },
+                service_name: { $first: "$service_id.name" },
+                service_price: { $first: "$service_id.price" },
+                quota: { $first: "$quota" },
+                is_full: { $first: "$is_full" },
+                registrants: {
+                  $push: {
+                    participant_id: "$registrants.participant_id._id",
+                    participant_name:
+                      "$registrants.participant_id.registration_data.fullName",
+                    status: "$registrants.status",
                   },
                 },
               },
             },
+          );
+        } else {
+          pipeline.push({
+            $match: {
+              schedule_date: {
+                $gte: minDate,
+              },
+            },
+          });
+          pipeline.push(
             {
-              $match: {
-                $or: [
-                  {
-                    schedule_date_text: {
-                      $regex: search,
-                      $options: "i",
-                    },
-                  },
-                  {
-                    "service_info.name": {
-                      $regex: search,
-                      $options: "i",
-                    },
-                  },
-                ],
+              $sort: { schedule_date: 1 },
+            },
+            {
+              $project: {
+                _id: "$_id",
+                schedule_date: "$schedule_date",
+                quota: "$quota",
+                is_full: "$is_full",
+                register_count: {
+                  $size: { $ifNull: ["$registrants", []] },
+                },
               },
             },
           );
         }
 
-        pipeline.push(
-          { $sort: { schedule_date: 1 } },
-          {
-            $addFields: {
-              registrants_count: {
-                $size: { $ifNull: ["$registrants", []] },
-              },
-            },
-          },
-        );
-
-        if (
-          typeof skip === "number" &&
-          typeof limit === "number" &&
-          skip >= 0 &&
-          limit > 0
-        ) {
-          pipeline.push({ $skip: skip });
-          pipeline.push({ $limit: limit });
-        }
-
-        pipeline.push({
-          $project: {
-            _id: 1,
-            service_name: "$service_info.name",
-            service_price: "$service_info.price",
-            schedule_date: 1,
-            quota: { $ifNull: ["$quota", 0] },
-            registrants: "$registrants_count",
-            is_full: { $ifNull: ["$is_full", false] },
-          },
-        });
-
         return this.aggregate(pipeline).exec();
       },
       getScheduleRegister(options: ScheduleQueryOptions = {}) {
         const { service_id } = options;
+
+        // 1. Logika Tanggal (H-4)
+        // Menggunakan tanggal hari ini, set jam ke 00:00:00 untuk akurasi hari
         const now = new Date();
-        const minDate = new Date(
-          Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
-        );
-        minDate.setUTCDate(minDate.getUTCDate() + 7);
+        const minDate = new Date(now);
+        minDate.setHours(0, 0, 0, 0);
+        minDate.setDate(minDate.getDate() + 4); // Ubah dari 7 menjadi 4 sesuai request
 
         const pipeline: PipelineStage[] = [
           {
             $match: {
               schedule_date: { $gte: minDate },
-              service_id: service_id,
+              // Jika service_id ada, filter. Jika tidak, ambil semua.
+              ...(service_id
+                ? { service_id: new mongoose.Types.ObjectId(service_id) }
+                : {}),
             },
           },
         ];
 
+        // 2. Ambil Nama Service (PENTING untuk FE Filter)
+        // Asumsi nama collection services adalah 'services'
+        pipeline.push({
+          $lookup: {
+            from: "services",
+            localField: "service_id",
+            foreignField: "_id",
+            as: "service_doc",
+          },
+        });
+
+        // Mengeluarkan object service dari array lookup
+        pipeline.push({
+          $unwind: {
+            path: "$service_doc",
+            preserveNullAndEmptyArrays: true,
+          },
+        });
+
+        // 3. Hitung Jumlah Pendaftar & Format Data
         pipeline.push({
           $addFields: {
+            // Ubah array registrants menjadi angka (count)
             registrants_count: {
               $size: { $ifNull: ["$registrants", []] },
             },
-            month_key: {
-              $dateToString: {
-                date: "$schedule_date",
-                format: "%Y-%m",
-              },
-            },
-            month_label: {
-              $dateToString: {
-                date: "$schedule_date",
-                format: "%B %Y",
-              },
-            },
-            month_start: {
-              $dateFromParts: {
-                year: { $year: "$schedule_date" },
-                month: { $month: "$schedule_date" },
-                day: 1,
-              },
-            },
+            // Ambil nama service untuk FE
+            service_name: "$service_doc.service_name",
           },
         });
 
+        // 4. Sorting berdasarkan tanggal terdekat
         pipeline.push({ $sort: { schedule_date: 1, _id: 1 } });
 
-        pipeline.push({
-          $group: {
-            _id: "$month_key",
-            month: { $first: "$month_label" },
-            startDate: { $first: "$month_start" },
-            schedules: {
-              $push: {
-                _id: "$_id",
-                schedule_date: "$schedule_date",
-                quota: { $ifNull: ["$quota", 0] },
-                registrants: "$registrants_count",
-                is_full: { $ifNull: ["$is_full", false] },
-              },
-            },
-          },
-        });
-
-        pipeline.push({ $sort: { startDate: 1 } });
-
+        // 5. Project (Format Akhir Flat Object)
+        // Ini menyesuaikan dengan prop `data` di CalendarCard FE
         pipeline.push({
           $project: {
-            _id: 0,
-            month: "$month",
-            schedules: 1,
+            _id: 1,
+            schedule_date: 1,
+            service_name: 1, // Penting untuk tombol filter di FE
+            quota: { $ifNull: ["$quota", 0] },
+            registrants: "$registrants_count", // Kirim sebagai number
+            is_full: { $ifNull: ["$is_full", false] },
+            // service_price: 1 (Opsional jika FE butuh harga)
           },
         });
 

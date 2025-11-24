@@ -1,10 +1,11 @@
 import { Response } from "express";
-import mongoose, { isValidObjectId } from "mongoose";
+import mongoose, { FilterQuery, isValidObjectId } from "mongoose";
 import { ConflictException } from "../exceptions";
 import {
   DataPendaftaran,
   IPaginationQuery,
   IReqUser,
+  IUserToken,
 } from "../interfaces/auth.interface";
 import {
   ISchedule,
@@ -15,6 +16,7 @@ import { PesertaModel } from "../models/user.model";
 import { registrantService } from "../services";
 import { ROLES } from "../utils/constants";
 import time from "../utils/date";
+import { getUserData } from "../utils/jwt";
 import response from "../utils/response";
 import {
   scheduleValidation,
@@ -68,8 +70,12 @@ export default {
   },
   async listSchedules(req: IReqUser, res: Response) {
     const user = req.user;
-    const { page, limit, search, service_id } =
-      req.query as unknown as IPaginationQuery;
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      service_id,
+    } = req.query as unknown as IPaginationQuery;
     const options: ScheduleQueryOptions = {};
 
     try {
@@ -80,23 +86,23 @@ export default {
           : undefined;
         options.service_id = _service_id;
       }
+
       if (user?.role === ROLES.ADMIN) {
         const skip = (page - 1) * limit;
         options.skip = skip;
         options.limit = limit;
+        options.role = user.role;
         if (search) {
           options.search = search;
         }
-      }
 
-      if (user?.role === ROLES.ADMIN) {
         const schedules = await ScheduleModel.getSchedule(options);
         response.pagination({
           res,
           data: schedules,
           pagination: {
             current: page,
-            totalPages: 0,
+            totalPages: Math.ceil(schedules.length / limit),
             total: schedules.length,
           },
           message: "Jadwal berhasil ditemukan",
@@ -104,8 +110,14 @@ export default {
         return;
       }
 
-      const schedules = await ScheduleModel.getScheduleRegister(options);
-      response.success(res, schedules, "Jadwal berhasil ditemukan");
+      const now = new Date();
+      const minDate = new Date(now);
+      minDate.setHours(0, 0, 0, 0);
+      minDate.setDate(minDate.getDate() + 4);
+      options.minDate = minDate;
+
+      const schedules = await ScheduleModel.getSchedule(options);
+      response.success(res, schedules, "berhasil");
     } catch (err) {
       const error = err as Error;
       response.error(res, error, error.message);
@@ -154,6 +166,7 @@ export default {
     }
   },
   async registerParticipant(req: IReqUser, res: Response) {
+    console.log(req.body);
     const register_date = Date.now();
     const { scheduleId } = req.params as { scheduleId: string };
     const participant_id = req?.user?._id as unknown as string;
