@@ -190,13 +190,32 @@ const scheduleSchema = new Schema<ISchedule>(
         return this.aggregate(pipeline).exec();
       },
       getSchedule(options: ScheduleQueryOptions = {}) {
-        const { service_id, search, skip, limit, role, minDate } = options;
+        const {
+          service_id,
+          skip = 0,
+          limit = 8,
+          page,
+          role,
+          minDate,
+          month,
+        } = options;
+        const currentLimit = Number(limit);
         const pipeline: PipelineStage[] = [];
 
         if (service_id) {
           pipeline.push({
             $match: {
               service_id: service_id,
+            },
+          });
+        }
+
+        if (month) {
+          pipeline.push({
+            $match: {
+              $expr: {
+                $eq: [{ $month: "$schedule_date" }, month],
+              },
             },
           });
         }
@@ -226,54 +245,51 @@ const scheduleSchema = new Schema<ISchedule>(
                 preserveNullAndEmptyArrays: true,
               },
             },
-            {
-              $lookup: {
-                from: "users",
-                localField: "registrants.participant_id",
-                foreignField: "_id",
-                as: "registrants.participant_id",
-              },
-            },
-            {
-              $unwind: {
-                path: "$registrants.participant_id",
-                preserveNullAndEmptyArrays: true,
-              },
-            },
+            // {
+            //   $lookup: {
+            //     from: "users",
+            //     localField: "registrants.participant_id",
+            //     foreignField: "_id",
+            //     as: "registrants.participant_id",
+            //   },
+            // },
+            // {
+            //   $unwind: {
+            //     path: "$registrants.participant_id",
+            //     preserveNullAndEmptyArrays: true,
+            //   },
+            // },
           );
-          if (search) {
-            pipeline.push(
-              {
-                $addFields: {
-                  schedule_date_str: {
-                    $dateToString: {
-                      format: "%Y-%m-%d",
-                      date: "$schedule_date",
-                    },
-                  },
-                },
-              },
-              {
-                $match: {
-                  $or: [
-                    { schedule_date_str: { $regex: search, $options: "i" } },
-                    { "service_id.name": { $regex: search, $options: "i" } },
-                    {
-                      "registrants.participant_id.registration_data.fullName": {
-                        $regex: search,
-                        $options: "i",
-                      },
-                    },
-                  ],
-                },
-              },
-            );
-          }
+          // if (search) {
+          //   pipeline.push(
+          //     {
+          //       $addFields: {
+          //         schedule_date_str: {
+          //           $dateToString: {
+          //             format: "%Y-%m-%d",
+          //             date: "$schedule_date",
+          //           },
+          //         },
+          //       },
+          //     },
+          //     {
+          //       $match: {
+          //         $or: [
+          //           { schedule_date_str: { $regex: search, $options: "i" } },
+          //           { "service_id.name": { $regex: search, $options: "i" } },
+          //           {
+          //             "registrants.participant_id.registration_data.fullName": {
+          //               $regex: search,
+          //               $options: "i",
+          //             },
+          //           },
+          //         ],
+          //       },
+          //     },
+          //   );
+          // }
 
           pipeline.push(
-            {
-              $sort: { schedule_date: 1 },
-            },
             {
               $group: {
                 _id: "$_id",
@@ -282,17 +298,65 @@ const scheduleSchema = new Schema<ISchedule>(
                 service_price: { $first: "$service_id.price" },
                 quota: { $first: "$quota" },
                 is_full: { $first: "$is_full" },
+                // registrants: { $first: "$registrants.participant_id" },
                 registrants: {
                   $push: {
-                    participant_id: "$registrants.participant_id._id",
-                    participant_name:
-                      "$registrants.participant_id.registration_data.fullName",
-                    status: "$registrants.status",
+                    $cond: {
+                      // Cek apakah participant_id ADA/VALID
+                      if: { $gt: ["$registrants.participant_id", null] },
+
+                      // JIKA ADA: Push objek lengkapnya
+                      then: {
+                        participant_id: "$registrants.participant_id",
+                      },
+
+                      // JIKA TIDAK ADA: Jangan push apa-apa ($$REMOVE menghapus item ini)
+                      else: "$$REMOVE",
+                    },
                   },
                 },
               },
             },
+            {
+              $sort: { schedule_date: 1 },
+            },
           );
+
+          pipeline.push({
+            $facet: {
+              data: [{ $skip: skip }, { $limit: currentLimit }],
+              metadata: [{ $count: "total" }],
+            },
+          });
+
+          // [2] TAHAP FORMATTING & KALKULASI (Setelah Facet)
+          pipeline.push({
+            $project: {
+              // Ambil data apa adanya
+              data: 1,
+
+              // Ambil total dari array metadata (handle jika kosong/0)
+              total: {
+                $ifNull: [{ $arrayElemAt: ["$metadata.total", 0] }, 0],
+              },
+            },
+          });
+
+          // [3] TAHAP FINAL STRUCTURE (Membangun Object Pagination)
+          pipeline.push({
+            $project: {
+              data: 1, // Data jadwal
+              pagination: {
+                current: { $literal: page }, // Masukkan nilai halaman saat ini dari variabel JS
+                total: "$total", // Total yang diambil dari tahap sebelumnya
+                totalPages: {
+                  $ceil: {
+                    $divide: ["$total", currentLimit], // Rumus: ceil(total / limit)
+                  },
+                },
+              },
+            },
+          });
         } else {
           pipeline.push({
             $match: {

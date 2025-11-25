@@ -1,5 +1,4 @@
 import { ObjectId, Types } from "mongoose";
-import { IRegistrants } from "./schedule.interface";
 
 interface HistoryResult {
   service_name: string;
@@ -15,12 +14,12 @@ interface HistoryResult {
 }
 
 interface ScheduleResult {
-  _id: ObjectId;
-  service_name: string;
-  schedule_date: Date;
-  quota: number;
-  is_full: boolean;
-  registrants?: IRegistrants[];
+  data: any[];
+  pagination: {
+    current: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 interface ScheduleRegisterItem {

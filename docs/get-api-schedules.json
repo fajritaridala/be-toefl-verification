@@ -1,0 +1,188 @@
+{
+  "name": "List Schedules",
+  "method": "GET",
+  "path": "/api/schedules",
+  "description": "Mengambil daftar jadwal layanan. Response dibedakan antara administrator (akses penuh + paginasi) dan pengguna/publik (jadwal mendatang minimal H-4).",
+  "authentication": {
+    "type": "Bearer JWT (optional)",
+    "scenarios": {
+      "admin": "Wajib membawa Authorization: Bearer <token> dengan role ADMIN untuk mendapatkan data paginasi lengkap beserta registrant snapshot.",
+      "public_or_non_admin": "Tanpa token atau token non-admin tetap valid; service otomatis memfilter jadwal yang dapat didaftarkan (minimal 4 hari dari hari ini) dan menyembunyikan detail registrant."
+    }
+  },
+  "queryParameters": {
+    "page": {
+      "type": "number",
+      "default": 1,
+      "required": false,
+      "availableFor": "admin only",
+      "description": "Halaman paginasi. Digunakan bersama limit untuk menghitung skip."
+    },
+    "limit": {
+      "type": "number",
+      "default": 10,
+      "required": false,
+      "availableFor": "admin only",
+      "description": "Jumlah item per halaman ketika admin melihat daftar jadwal."
+    },
+    "search": {
+      "type": "string",
+      "required": false,
+      "availableFor": "admin only",
+      "description": "Pencarian fuzzy terhadap tanggal jadwal (YYYY-MM-DD), nama layanan, atau nama peserta terdaftar."
+    },
+    "service_id": {
+      "type": "string(ObjectId)",
+      "required": false,
+      "availableFor": "all roles",
+      "description": "Filter jadwal berdasarkan layanan tertentu. Harus ObjectId valid; jika tidak valid akan menghasilkan error 400 (Yup validation)."
+    }
+  },
+  "responses": {
+    "200": [
+      {
+        "scenario": "admin",
+        "bodySchema": {
+          "meta": {
+            "status": 200,
+            "message": "Jadwal berhasil ditemukan"
+          },
+          "data": [
+            {
+              "_id": "ObjectId",
+              "schedule_date": "ISO8601 string",
+              "service_name": "string",
+              "service_price": "number",
+              "quota": "number",
+              "is_full": "boolean",
+              "registrants": [
+                {
+                  "participant_id": "ObjectId | null",
+                  "participant_name": "string | null",
+                  "status": "string enum REGISTER_STATUS"
+                }
+              ]
+            }
+          ],
+          "pagination": {
+            "current": "number(page)",
+            "totalPages": "number",
+            "total": "number"
+          }
+        }
+      },
+      {
+        "scenario": "public_or_non_admin",
+        "bodySchema": {
+          "meta": {
+            "status": 200,
+            "message": "berhasil"
+          },
+          "data": [
+            {
+              "_id": "ObjectId",
+              "schedule_date": "ISO8601 string",
+              "quota": "number",
+              "is_full": "boolean",
+              "register_count": "number"
+            }
+          ],
+          "needsRegistration": "boolean | null"
+        }
+      }
+    ],
+    "400": {
+      "description": "Validasi query gagal (mis. service_id tidak valid).",
+      "bodySchema": {
+        "meta": {
+          "status": 400,
+          "message": "Pesan error dari Yup atau default error handler"
+        },
+        "data": "string | null"
+      }
+    },
+    "500": {
+      "description": "Kesalahan internal/MongoError (mis. pipeline gagal).",
+      "bodySchema": {
+        "meta": {
+          "status": 500,
+          "message": "Pesan kesalahan"
+        },
+        "data": "detail error"
+      }
+    }
+  },
+  "examples": {
+    "requests": [
+      {
+        "description": "Admin mencari jadwal layanan tertentu",
+        "headers": {
+          "Authorization": "Bearer <admin-jwt>"
+        },
+        "query": {
+          "page": 2,
+          "limit": 10,
+          "search": "toefl",
+          "service_id": "665fd4204aa5eb8d1fb3f0c2"
+        }
+      },
+      {
+        "description": "Publik melihat jadwal mendatang",
+        "headers": {},
+        "query": {}
+      }
+    ],
+    "responses": {
+      "admin": {
+        "meta": {
+          "status": 200,
+          "message": "Jadwal berhasil ditemukan"
+        },
+        "data": [
+          {
+            "_id": "6660b8136ff5de58c9285fe4",
+            "schedule_date": "2025-01-12T02:00:00.000Z",
+            "service_name": "TOEFL ITP",
+            "service_price": 350000,
+            "quota": 40,
+            "is_full": false,
+            "registrants": [
+              {
+                "participant_id": "665ff1144cd27d2aa8e5d7b9",
+                "participant_name": "Budi Santoso",
+                "status": "PENDING"
+              }
+            ]
+          }
+        ],
+        "pagination": {
+          "current": 2,
+          "totalPages": 5,
+          "total": 10
+        }
+      },
+      "public": {
+        "meta": {
+          "status": 200,
+          "message": "berhasil"
+        },
+        "data": [
+          {
+            "_id": "6660b8136ff5de58c9285fe4",
+            "schedule_date": "2025-01-12T02:00:00.000Z",
+            "quota": 40,
+            "is_full": false,
+            "register_count": 12
+          }
+        ],
+        "needsRegistration": null
+      }
+    }
+  },
+  "notes": [
+    "Admin branch menggunakan opsi paginasi manual (skip/limit) sehingga pagination.total mewakili jumlah record yang ditarik pada halaman tersebut, bukan total koleksi.",
+    "Publik/non-admin mengabaikan parameter page/limit/search dan hanya mengembalikan jadwal dengan schedule_date >= (hari ini + 4 hari).",
+    "Parameter service_id akan dicasting ke ObjectId hanya jika valid; jika tidak, validasi menghasilkan error sebelum query dieksekusi.",
+    "Field registrants pada admin response dapat berupa array kosong ketika belum ada pendaftar."
+  ]
+}

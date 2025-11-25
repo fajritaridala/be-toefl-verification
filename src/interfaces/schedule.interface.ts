@@ -49,12 +49,13 @@ interface ISchedule {
 
 interface ScheduleQueryOptions {
   service_id?: Types.ObjectId | undefined;
-  search?: string;
-  skip?: number;
+  page?: number;
   limit?: number;
+  skip?: number;
   status?: string;
   role?: string;
   minDate?: Date;
+  month?: number;
 }
 
 interface ScheduleRegistrantsQueryOptions {

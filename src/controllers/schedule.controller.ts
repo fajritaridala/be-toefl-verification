@@ -71,11 +71,11 @@ export default {
   async listSchedules(req: IReqUser, res: Response) {
     const user = req.user;
     const {
+      service_id,
       page = 1,
       limit = 10,
-      search,
-      service_id,
-    } = req.query as unknown as IPaginationQuery;
+      month,
+    } = req.query as unknown as ScheduleQueryOptions;
     const options: ScheduleQueryOptions = {};
 
     try {
@@ -89,25 +89,30 @@ export default {
 
       if (user?.role === ROLES.ADMIN) {
         const skip = (page - 1) * limit;
+        options.page = page;
         options.skip = skip;
         options.limit = limit;
         options.role = user.role;
-        if (search) {
-          options.search = search;
+        if (month) {
+          options.month = Number(month);
         }
 
         const schedules = await ScheduleModel.getSchedule(options);
-        response.pagination({
+        return response.pagination({
           res,
-          data: schedules,
+          data: schedules[0].data,
           pagination: {
-            current: page,
-            totalPages: Math.ceil(schedules.length / limit),
-            total: schedules.length,
+            current: schedules[0].pagination.current,
+            total: schedules[0].pagination.total,
+            totalPages: schedules[0].pagination.totalPages,
           },
           message: "Jadwal berhasil ditemukan",
         });
-        return;
+      }
+
+      if (!service_id) {
+        const error = new Error("Harus menyertakan ID layanan");
+        return response.error(res, error, error.message);
       }
 
       const now = new Date();
@@ -166,7 +171,6 @@ export default {
     }
   },
   async registerParticipant(req: IReqUser, res: Response) {
-    console.log(req.body);
     const register_date = Date.now();
     const { scheduleId } = req.params as { scheduleId: string };
     const participant_id = req?.user?._id as unknown as string;
