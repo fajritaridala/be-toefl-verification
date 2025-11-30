@@ -1,23 +1,22 @@
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
-import { errorHandler } from "./middlewares/error.middleware";
-import router from "./routes";
-import db from "./utils/database";
-import { PORT } from "./utils/env";
+import errorHandler from "./common/middlewares/error.middleware";
+import dbConnect from "./config/db";
+import { PORT } from "./config/env";
+import router from "./config/routes";
 
 async function init() {
   try {
-    const dbConnection = await db();
-    console.log(`Database status: ${dbConnection}`);
+    const db = await dbConnect();
+    console.log(`Database status: ${db}`);
 
     const app = express();
 
     app.use(cors());
     app.use(bodyParser.json());
-    app.use("/api", router);
 
-    // Error handler middleware (must be last)
+    app.use("/api", router);
     app.use(errorHandler);
 
     app.listen(PORT, () => {

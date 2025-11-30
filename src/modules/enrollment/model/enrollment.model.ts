@@ -1,0 +1,75 @@
+import mongoose from "mongoose";
+import { ENROLLED_STATUS, GENDER } from "../../../common/utils/constants";
+import { EnrollModel, Enrollment } from "../enrollment.interface";
+import enrollStatic from "./enrollment.static";
+
+const Schema = mongoose.Schema;
+
+const EnrollmentSchema = new Schema<Enrollment, EnrollModel>(
+  {
+    scheduleId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "schedules",
+    },
+    participantId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "users",
+    },
+    paymentId: {
+      type: Schema.Types.String,
+      required: true,
+    },
+    paymentProof: {
+      type: Schema.Types.String,
+      required: true,
+    },
+    paymentDate: {
+      type: Schema.Types.Date,
+      required: true,
+    },
+    candidate: {
+      _id: false,
+      fullName: { type: Schema.Types.String, required: true, index: true },
+      gender: {
+        type: Schema.Types.String,
+        enum: Object.values(GENDER),
+        required: true,
+      },
+      email: { type: Schema.Types.String, required: true },
+      phoneNumber: { type: Schema.Types.Number, required: true },
+      nim: { type: Schema.Types.String, required: true, index: true },
+      faculty: { type: Schema.Types.String, required: true },
+      major: { type: Schema.Types.String, required: true },
+    },
+    status: {
+      type: Schema.Types.String,
+      enum: Object.values(ENROLLED_STATUS),
+      default: ENROLLED_STATUS.PENDING,
+    },
+    verification: {
+      _id: false,
+      verifiedBy: { type: Schema.Types.ObjectId, ref: "users" },
+      verifiedAt: { type: Schema.Types.Date },
+    },
+    hash: { type: Schema.Types.String },
+  },
+  {
+    timestamps: true,
+    statics: {
+      findAll: enrollStatic.findAll,
+      getScheduleParticipants: enrollStatic.getScheduleParticipants,
+      findParticipant: enrollStatic.findParticipant,
+    },
+  },
+);
+
+EnrollmentSchema.index({ scheduleId: 1, participantId: 1 }, { unique: true });
+
+const EnrollmentModel = mongoose.model<Enrollment, EnrollModel>(
+  "enrollments",
+  EnrollmentSchema,
+);
+
+export default EnrollmentModel;
