@@ -38,6 +38,10 @@ const uploader = {
       });
       return result;
     },
+    verify: async (cid: string) => {
+      const result = await pinata.gateways.private.get(cid);
+      return result;
+    },
   },
 };
 

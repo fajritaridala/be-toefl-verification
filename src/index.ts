@@ -4,7 +4,7 @@ import bodyParser from "body-parser";
 import errorHandler from "./common/middlewares/error.middleware";
 import dbConnect from "./config/db";
 import { PORT } from "./config/env";
-import router from "./config/routes";
+import router from "./common/utils/routes";
 
 async function init() {
   try {
