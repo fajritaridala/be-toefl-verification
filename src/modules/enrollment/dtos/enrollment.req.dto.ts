@@ -69,7 +69,10 @@ const submitEnrollSchema = yup.object().shape({
   reading: yup.number().required("nilai reading harus ada"),
   structure: yup.number().required("nilai structure harus ada"),
 });
-const submitEnrollParamsSchema = enrollUserSchema;
+const submitEnrollParamsSchema = yup.object().shape({
+  enrollId: yup.string().required("id enroll harus ada"),
+  participantId: yup.string().required("id participant harus ada"),
+});
 type SubmitEnrollDto = yup.InferType<typeof submitEnrollSchema>;
 type SubmitEnrollParamsDto = yup.InferType<typeof submitEnrollParamsSchema>;
 type SubmitEnrollOptionsDto = {
@@ -77,11 +80,39 @@ type SubmitEnrollOptionsDto = {
   params: SubmitEnrollParamsDto;
 };
 
+// blockchainSuccess
+const blockchainParamsSchema = submitEnrollParamsSchema.shape({
+  enrollId: yup.string().required("id enroll harus ada"),
+});
+type BlockchainDto = {
+  hash: string;
+};
+type BlockchainParamsDto = yup.InferType<typeof blockchainParamsSchema>;
+type BlockchainOptionsDto = {
+  body: BlockchainDto;
+  params: BlockchainParamsDto;
+};
+
+// get hash
+const getHashSchema = yup.object().shape({
+  hash: yup.string().required("hash harus ada"),
+});
+type GetHashDto = yup.InferType<typeof getHashSchema>;
+type GetHashUserDto = {
+  participantId: string;
+};
+type GetHashOptionsDto = {
+  body: GetHashDto;
+  user: GetHashUserDto;
+};
+
 export {
   approvalEnrollParamsSchema,
   approvalEnrollSchema,
+  blockchainParamsSchema,
   enrollUserSchema,
   findAllEnrollQuerySchema,
+  getHashSchema,
   registerEnrollParamsSchema,
   registerEnrollSchema,
   submitEnrollParamsSchema,
@@ -91,9 +122,15 @@ export type {
   ApprovalEnrolDto,
   ApprovalEnrollOptionsDto,
   ApprovalEnrolParamsDto,
+  BlockchainDto,
+  BlockchainOptionsDto,
+  BlockchainParamsDto,
   EnrollUserDto,
   FindAllEnrollOptionsDto,
   FindAllEnrollQueryDto,
+  GetHashDto,
+  GetHashOptionsDto,
+  GetHashUserDto,
   GetScheduleEnrollOptionsDto,
   RegisterEnrollDto,
   RegisterEnrollOptionsDto,

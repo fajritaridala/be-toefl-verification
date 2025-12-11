@@ -12,6 +12,7 @@ enum ENROLLED_STATUS {
   PENDING = "menunggu",
   APPROVED = "disetujui",
   REJECTED = "ditolak",
+  FINISHED = "selesai",
 }
 
 enum GENDER {

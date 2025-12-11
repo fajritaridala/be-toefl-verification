@@ -13,7 +13,7 @@ const auth = {
 
     const user = jwt.getUser(accessToken);
     if (!user) return response.unauthorized(res);
-
+    
     (req as ReqUser).user = user;
     next();
   },

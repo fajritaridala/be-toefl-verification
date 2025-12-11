@@ -7,8 +7,10 @@ import uploader from "../../common/utils/uploader";
 import ScheduleModel from "../schedule/models/schedule.model";
 import {
   ApprovalEnrollOptionsDto,
+  BlockchainOptionsDto,
   FindAllEnrollOptionsDto,
   FindAllEnrollQueryDto,
+  GetHashUserDto,
   GetScheduleEnrollOptionsDto,
   RegisterEnrollOptionsDto,
   RegisterEnrollParamsDto,
@@ -131,6 +133,7 @@ const enrollmentService = {
   submitScore: async (options: SubmitEnrollOptionsDto) => {
     const participant = await EnrollmentModel.findParticipant({
       participantId: options.params.participantId,
+      enrollId: options.params.enrollId,
     });
     if (!participant) throw new Error("Peserta tidak ditemukan");
     const { user, address } = participant;
@@ -159,23 +162,54 @@ const enrollmentService = {
     const cid = "bafybeig44clrhah3cthmwsi23xi3mveuiv6lzn5xaioxzufnkgcopsia6u";
     const hash = `0x${generateHash({ cid, address })}`;
 
-    await EnrollmentModel.findOneAndUpdate(
+    // await EnrollmentModel.findOneAndUpdate(
+    //   {
+    //     participantId: new mongoose.Types.ObjectId(
+    //       options.params.participantId,
+    //     ),
+    //   },
+    //   {
+    //     $set: {
+    //       hash,
+    //     },
+    //   },
+    //   {
+    //     new: true,
+    //   },
+    // );
+
+    return {
+      cid,
+      hash,
+      participantId: options.params.participantId,
+      enrollId: options.params.enrollId,
+    };
+  },
+  blockchainSuccess: async (options: BlockchainOptionsDto) => {
+    const hash = options.body.hash;
+    const participantId = options.params.participantId;
+    const result = await EnrollmentModel.findOneAndUpdate(
       {
-        participantId: new mongoose.Types.ObjectId(
-          options.params.participantId,
-        ),
+        _id: new mongoose.Types.ObjectId(options.params.enrollId),
+        participantId: new mongoose.Types.ObjectId(participantId),
       },
       {
         $set: {
           hash,
+          status: ENROLLED_STATUS.FINISHED,
         },
       },
       {
         new: true,
       },
     );
-
-    return { cid, hash };
+    return result;
+  },
+  getHash: async (user: GetHashUserDto) => {
+    const data = await EnrollmentModel.findOne({ participantId: user });
+    if (!data) throw new Error("Peserta tidak ditemukan");
+    const hash = data?.hash;
+    return { hash };
   },
 };
 

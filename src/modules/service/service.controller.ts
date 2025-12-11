@@ -1,9 +1,9 @@
 import { Response } from "express";
 import {
-  type PaginationDto,
   ParamsDto,
-  paginationSchema,
+  QueryDto,
   paramsSchema,
+  querySchema,
 } from "../../common/dtos/query.dto";
 import response from "../../common/utils/response";
 import type { ReqUser } from "../auth/auth.dto";
@@ -17,8 +17,7 @@ import serviceService from "./service.service";
 
 const serviceController = {
   findAll: async (req: ReqUser, res: Response) => {
-    const query: PaginationDto = await paginationSchema.validate(req.query);
-    console.log(query);
+    const query: QueryDto = await querySchema.validate(req.query);
     const result = await serviceService.findAll(query);
     return response.success(res, result, "berhasil mendapatkan daftar layanan");
   },

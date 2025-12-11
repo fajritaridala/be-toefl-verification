@@ -6,8 +6,12 @@ import {
   ApprovalEnrolDto,
   ApprovalEnrolParamsDto,
   ApprovalEnrollOptionsDto,
+  BlockchainDto,
+  BlockchainOptionsDto,
+  BlockchainParamsDto,
   EnrollUserDto,
   FindAllEnrollQueryDto,
+  GetHashUserDto,
   RegisterEnrollDto,
   RegisterEnrollOptionsDto,
   RegisterEnrollParamsDto,
@@ -16,6 +20,7 @@ import {
   SubmitEnrollParamsDto,
   approvalEnrollParamsSchema,
   approvalEnrollSchema,
+  blockchainParamsSchema,
   enrollUserSchema,
   findAllEnrollQuerySchema,
   registerEnrollParamsSchema,
@@ -100,6 +105,23 @@ const enrollmentController = {
     const result = await enrollmentService.submitScore(options);
     return response.success(res, result, "berhasil mendapatkan cid dan hash");
   }, // admin melakukan scoring ke peserta yang mendaftar
+  blockchainSuccess: async (req: ReqUser, res: Response) => {
+    const params: BlockchainParamsDto = await blockchainParamsSchema.validate(
+      req.params,
+    );
+    const body: BlockchainDto = req.body;
+    const options: BlockchainOptionsDto = {
+      params,
+      body,
+    };
+    const result = await enrollmentService.blockchainSuccess(options);
+    return response.success(res, result, "berhasil mendapatkan cid dan hash");
+  },
+  getHash: async (req: ReqUser, res: Response) => {
+    const user: GetHashUserDto = req.user?._id as unknown as GetHashUserDto;
+    const result = await enrollmentService.getHash(user);
+    return response.success(res, result, "berhasil mendapatkan hash");
+  },
 };
 
 export default enrollmentController;

@@ -1,9 +1,9 @@
-import type { PaginationDto, ParamsDto } from "../../common/dtos/query.dto";
+import type { ParamsDto, QueryDto } from "../../common/dtos/query.dto";
 import type { CreateServiceDto, UpdateServiceDto } from "./service.dto";
 import ServiceModel from "./service.model";
 
 const serviceService = {
-  findAll: async (query: PaginationDto) => {
+  findAll: async (query: QueryDto) => {
     const data = await ServiceModel.find()
       .select("-__v -createdAt -updatedAt")
       .limit(query.limit)

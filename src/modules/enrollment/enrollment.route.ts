@@ -14,8 +14,13 @@ router.post("/:scheduleId", [
 ]);
 router.get("/", [
   auth.user,
-  roleGuard(ROLES.ADMIN),
+  roleGuard(ROLES.PESERTA),
   enrollmentController.findAll,
+]);
+router.get("/hash", [
+  auth.user,
+  roleGuard(ROLES.PESERTA),
+  enrollmentController.getHash,
 ]);
 router.get("/:scheduleId", [
   auth.user,
@@ -27,10 +32,15 @@ router.patch("/:enrollId/approval", [
   roleGuard(ROLES.ADMIN),
   enrollmentController.approval,
 ]);
-router.patch("/:participantId/submit-score", [
+router.patch("/:enrollId/:participantId/submit-score", [
   auth.user,
   roleGuard(ROLES.ADMIN),
   enrollmentController.submitScore,
+]);
+router.patch("/:enrollId/:participantId/blockchain-success", [
+  auth.user,
+  roleGuard(ROLES.ADMIN),
+  enrollmentController.blockchainSuccess,
 ]);
 
 export default router;

@@ -59,13 +59,29 @@ const enrollStatic = {
             },
           },
           {
+            $lookup: {
+              from: "services",
+              localField: "schedule.serviceId",
+              foreignField: "_id",
+              as: "service",
+            },
+          },
+          {
+            $unwind: {
+              path: "$service",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
             $project: {
-              _id: 0,
+              _id: 1,
               scheduleId: 1,
-              scheduleName: "$schedule.name",
+              scheduleDate: "$schedule.scheduleDate",
+              serviceName: "$service.name",
               paymentProof: 1,
               paymentDate: 1,
               status: 1,
+              participantId: 1,
               fullName: "$candidate.fullName",
               gender: "$candidate.gender",
               email: "$candidate.email",
@@ -169,13 +185,13 @@ const enrollStatic = {
     };
   },
   async findParticipant(this: EnrollModel, options: SubmitEnrollParamsDto) {
-    const { participantId } = options;
     const pipeline: PipelineStage[] = [];
 
     pipeline.push(
       {
         $match: {
-          participantId: new mongoose.Types.ObjectId(participantId),
+          _id: new mongoose.Types.ObjectId(options.enrollId),
+          participantId: new mongoose.Types.ObjectId(options.participantId),
           status: ENROLLED_STATUS.APPROVED,
         },
       },
