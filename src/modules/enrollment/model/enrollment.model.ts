@@ -1,11 +1,13 @@
 import mongoose from "mongoose";
 import { ENROLLED_STATUS, GENDER } from "../../../common/utils/constants";
-import { EnrollModel, Enrollment } from "../enrollment.interface";
+import { UserStatic } from "../../user/dtos/user.interface";
+import userStatic from "../../user/user.static";
+import { Enrollment } from "../enrollment.interface";
 import enrollStatic from "./enrollment.static";
 
 const Schema = mongoose.Schema;
 
-const EnrollmentSchema = new Schema<Enrollment, EnrollModel>(
+const EnrollmentSchema = new Schema<Enrollment, UserStatic>(
   {
     scheduleId: {
       type: Schema.Types.ObjectId,
@@ -37,6 +39,7 @@ const EnrollmentSchema = new Schema<Enrollment, EnrollModel>(
         enum: Object.values(GENDER),
         required: true,
       },
+      birthDate: { type: Schema.Types.Date, required: true },
       email: { type: Schema.Types.String, required: true },
       phoneNumber: { type: Schema.Types.Number, required: true },
       nim: { type: Schema.Types.String, required: true, index: true },
@@ -61,13 +64,14 @@ const EnrollmentSchema = new Schema<Enrollment, EnrollModel>(
       findAll: enrollStatic.findAll,
       getScheduleParticipants: enrollStatic.getScheduleParticipants,
       findParticipant: enrollStatic.findParticipant,
+      findActivity: userStatic.findActivity,
     },
   },
 );
 
 EnrollmentSchema.index({ scheduleId: 1, participantId: 1 }, { unique: true });
 
-const EnrollmentModel = mongoose.model<Enrollment, EnrollModel>(
+const EnrollmentModel = mongoose.model<Enrollment, UserStatic>(
   "enrollments",
   EnrollmentSchema,
 );

@@ -19,6 +19,7 @@ interface Enrollment {
   candidate: {
     fullName: string;
     gender: string;
+    birthDate: Date;
     email: string;
     phoneNumber: number;
     nim: string;
@@ -48,6 +49,7 @@ interface EnrollModel extends Model<Enrollment> {
 }
 
 type EnrollPinataJson = Enrollment["candidate"] & {
+  serviceName: string;
   listening: number;
   reading: number;
   structure: number;

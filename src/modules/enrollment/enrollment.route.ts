@@ -6,26 +6,21 @@ import { ROLES } from "../../common/utils/constants";
 import enrollmentController from "./enrollment.controller";
 
 const router: Router = Router();
-router.post("/:scheduleId", [
-  auth.user,
-  uploadMiddleware.single("file"),
-  roleGuard(ROLES.PESERTA),
-  enrollmentController.register,
-]);
 router.get("/", [
   auth.user,
-  roleGuard(ROLES.PESERTA),
+  roleGuard(ROLES.ADMIN),
   enrollmentController.findAll,
-]);
-router.get("/hash", [
-  auth.user,
-  roleGuard(ROLES.PESERTA),
-  enrollmentController.getHash,
 ]);
 router.get("/:scheduleId", [
   auth.user,
   roleGuard(ROLES.ADMIN),
   enrollmentController.getScheduleParticipants,
+]);
+router.post("/:scheduleId", [
+  auth.user,
+  uploadMiddleware.single("file"),
+  roleGuard(ROLES.PESERTA),
+  enrollmentController.register,
 ]);
 router.patch("/:enrollId/approval", [
   auth.user,

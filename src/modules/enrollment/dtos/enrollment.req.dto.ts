@@ -12,6 +12,7 @@ const registerEnrollParamsSchema = yup.object().shape({
 const registerEnrollSchema = yup.object().shape({
   paymentDate: yup.date().required("tanggal pembayaran harus ada"),
   fullName: yup.string().required("nama lengkap harus ada"),
+  birthDate: yup.date().required("tanggal lahir harus ada"),
   gender: yup.string().required("jenis kelamin harus ada"),
   email: yup.string().email().required("email harus ada"),
   phoneNumber: yup.number().required("nomor telepon harus ada"),
@@ -93,26 +94,12 @@ type BlockchainOptionsDto = {
   params: BlockchainParamsDto;
 };
 
-// get hash
-const getHashSchema = yup.object().shape({
-  hash: yup.string().required("hash harus ada"),
-});
-type GetHashDto = yup.InferType<typeof getHashSchema>;
-type GetHashUserDto = {
-  participantId: string;
-};
-type GetHashOptionsDto = {
-  body: GetHashDto;
-  user: GetHashUserDto;
-};
-
 export {
   approvalEnrollParamsSchema,
   approvalEnrollSchema,
   blockchainParamsSchema,
   enrollUserSchema,
   findAllEnrollQuerySchema,
-  getHashSchema,
   registerEnrollParamsSchema,
   registerEnrollSchema,
   submitEnrollParamsSchema,
@@ -128,9 +115,6 @@ export type {
   EnrollUserDto,
   FindAllEnrollOptionsDto,
   FindAllEnrollQueryDto,
-  GetHashDto,
-  GetHashOptionsDto,
-  GetHashUserDto,
   GetScheduleEnrollOptionsDto,
   RegisterEnrollDto,
   RegisterEnrollOptionsDto,

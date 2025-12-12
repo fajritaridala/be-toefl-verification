@@ -32,7 +32,7 @@ const uploader = {
       data: EnrollPinataJson,
       fileName: string,
     ): Promise<UploadResponse> => {
-      const result = await pinata.upload.private.json({
+      const result = await pinata.upload.public.json({
         content: data,
         name: fileName,
       });

@@ -2,14 +2,19 @@ import { Types } from "mongoose";
 import { PaginationDto } from "../../../common/dtos/query.dto";
 import { RegisterEnrollDto } from "./enrollment.req.dto";
 
+interface EnrollmentItem extends RegisterEnrollDto {
+  enrollId: Types.ObjectId | string;
+  scheduleId: Types.ObjectId | string;
+  participantId: Types.ObjectId | string;
+  paymentProof: string;
+  paymentDate: Date;
+  scheduleDate: Date;
+  status: string;
+  registerAt: Date;
+}
+
 interface FindAllEnrollResponseDto {
-  data: RegisterEnrollDto & {
-    paymentProof: string;
-    status: string;
-    scheduleId: Types.ObjectId | string;
-    scheduleDate: Date;
-    registerAt: Date;
-  };
+  data: EnrollmentItem[];
   pagination: PaginationDto;
 }
 
@@ -19,7 +24,9 @@ interface GetScheduleEnrollResponseDto {
 }
 
 interface FindParticipantResponseDto {
-  user: Omit<RegisterEnrollDto, "paymentDate">;
+  certificate: Omit<RegisterEnrollDto, "paymentDate"> & {
+    serviceName: string;
+  };
   address: string;
 }
 

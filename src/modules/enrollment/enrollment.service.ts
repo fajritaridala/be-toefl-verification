@@ -10,7 +10,6 @@ import {
   BlockchainOptionsDto,
   FindAllEnrollOptionsDto,
   FindAllEnrollQueryDto,
-  GetHashUserDto,
   GetScheduleEnrollOptionsDto,
   RegisterEnrollOptionsDto,
   RegisterEnrollParamsDto,
@@ -89,8 +88,27 @@ const enrollmentService = {
     if (query.search) {
       options.search = query.search;
     }
-    const data = await EnrollmentModel.findAll(options);
-    return data;
+    const { data, pagination } = await EnrollmentModel.findAll(options);
+    const result = data.map((item) => ({
+      enrollId: item.enrollId,
+      scheduleId: item.scheduleId,
+      participantId: item.participantId,
+      scheduleDate: item.scheduleDate,
+      registerAt: item.registerAt,
+      paymentDate: item.paymentDate,
+      paymentProof: item.paymentProof,
+      status: item.status,
+      fullName: item.fullName,
+      gender: item.gender,
+      birthDate: item.birthDate,
+      email: item.email,
+      phoneNumber: item.phoneNumber,
+      nim: item.nim,
+      faculty: item.faculty,
+      major: item.major,
+    }));
+
+    return { result, pagination };
   },
   getScheduleParticipants: async (
     query: QueryDto,
@@ -136,47 +154,32 @@ const enrollmentService = {
       enrollId: options.params.enrollId,
     });
     if (!participant) throw new Error("Peserta tidak ditemukan");
-    const { user, address } = participant;
+    const { certificate, address } = participant;
+    console.log(certificate);
 
-    const { totalScore, listening, structure, reading } = toeflConverter(
-      options.body,
-    );
+    const score = toeflConverter(options.body);
 
     const data: EnrollPinataJson = {
-      fullName: user.fullName,
-      gender: user.gender,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      nim: user.nim,
-      faculty: user.faculty,
-      major: user.major,
-      listening,
-      structure,
-      reading,
-      totalScore,
+      serviceName: certificate.serviceName,
+      fullName: certificate.fullName,
+      gender: certificate.gender,
+      birthDate: certificate.birthDate,
+      email: certificate.email,
+      phoneNumber: certificate.phoneNumber,
+      nim: certificate.nim,
+      faculty: certificate.faculty,
+      major: certificate.major,
+      listening: score.listening,
+      reading: score.reading,
+      structure: score.structure,
+      totalScore: score.totalScore,
     };
 
     const fileName: string = `${data.nim}-${data.fullName.split(" ")[1].toLowerCase()}.json`;
 
     // const { cid } = await uploader.pinata.json(data, fileName);
-    const cid = "bafybeig44clrhah3cthmwsi23xi3mveuiv6lzn5xaioxzufnkgcopsia6u";
+    const { cid } = await uploader.pinata.json(data, fileName);
     const hash = `0x${generateHash({ cid, address })}`;
-
-    // await EnrollmentModel.findOneAndUpdate(
-    //   {
-    //     participantId: new mongoose.Types.ObjectId(
-    //       options.params.participantId,
-    //     ),
-    //   },
-    //   {
-    //     $set: {
-    //       hash,
-    //     },
-    //   },
-    //   {
-    //     new: true,
-    //   },
-    // );
 
     return {
       cid,
@@ -204,12 +207,6 @@ const enrollmentService = {
       },
     );
     return result;
-  },
-  getHash: async (user: GetHashUserDto) => {
-    const data = await EnrollmentModel.findOne({ participantId: user });
-    if (!data) throw new Error("Peserta tidak ditemukan");
-    const hash = data?.hash;
-    return { hash };
   },
 };
 

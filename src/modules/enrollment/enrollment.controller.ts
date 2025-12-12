@@ -11,7 +11,6 @@ import {
   BlockchainParamsDto,
   EnrollUserDto,
   FindAllEnrollQueryDto,
-  GetHashUserDto,
   RegisterEnrollDto,
   RegisterEnrollOptionsDto,
   RegisterEnrollParamsDto,
@@ -53,15 +52,11 @@ const enrollmentController = {
   findAll: async (req: ReqUser, res: Response) => {
     const query: FindAllEnrollQueryDto =
       await findAllEnrollQuerySchema.validate(req.query);
-    const result = await enrollmentService.findAll(query);
+    const { result, pagination } = await enrollmentService.findAll(query);
     return response.pagination({
       res,
-      data: result.data,
-      pagination: {
-        current: result.pagination.current,
-        total: result.pagination.total,
-        totalPages: result.pagination.totalPages,
-      },
+      data: result,
+      pagination,
       message: "data berhasil diambil",
     });
   }, // tampilkan semua peserta
@@ -116,11 +111,6 @@ const enrollmentController = {
     };
     const result = await enrollmentService.blockchainSuccess(options);
     return response.success(res, result, "berhasil mendapatkan cid dan hash");
-  },
-  getHash: async (req: ReqUser, res: Response) => {
-    const user: GetHashUserDto = req.user?._id as unknown as GetHashUserDto;
-    const result = await enrollmentService.getHash(user);
-    return response.success(res, result, "berhasil mendapatkan hash");
   },
 };
 
