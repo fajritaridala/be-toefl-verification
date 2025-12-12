@@ -10,7 +10,7 @@ router.post("/", [
   roleGuard(ROLES.ADMIN),
   scheduleController.create,
 ]);
-router.get("/", scheduleController.findAll);
+router.get("/", auth.optional, scheduleController.findAll);
 router.patch("/:scheduleId", [
   auth.user,
   roleGuard(ROLES.ADMIN),

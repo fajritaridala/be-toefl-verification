@@ -3,7 +3,7 @@ import type { OptionsDto } from "../../../common/dtos/query.dto";
 import type { ScheduleModel } from "../schedule.interface";
 
 async function findAll(this: ScheduleModel, options: OptionsDto) {
-  const { skip, limit, serviceId, status, month } = options;
+  const { skip, limit, serviceId, status, month, minDate } = options;
   const pipeline: PipelineStage[] = [];
 
   if (serviceId) {
@@ -24,6 +24,14 @@ async function findAll(this: ScheduleModel, options: OptionsDto) {
         $expr: {
           $eq: [{ $month: "$scheduleDate" }, month],
         },
+      },
+    });
+  }
+
+  if (minDate) {
+    pipeline.push({
+      $match: {
+        scheduleDate: { $gte: minDate },
       },
     });
   }
@@ -56,7 +64,8 @@ async function findAll(this: ScheduleModel, options: OptionsDto) {
         },
         {
           $project: {
-            _id: 1,
+            _id: 0,
+            scheduleId: "$_id",
             scheduleDate: 1,
             startTime: 1,
             endTime: 1,
@@ -81,7 +90,7 @@ async function findAll(this: ScheduleModel, options: OptionsDto) {
 
   return {
     data,
-    meta: {
+    pagination: {
       current,
       total,
       totalPages,

@@ -230,6 +230,7 @@ const enrollStatic = {
           _id: 0,
           certificate: {
             serviceName: "$service.name",
+            scheduleDate: "$schedule.scheduleDate",
             fullName: "$candidate.fullName",
             gender: "$candidate.gender",
             birthDate: "$candidate.birthDate",

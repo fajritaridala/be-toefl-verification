@@ -26,6 +26,7 @@ interface GetScheduleEnrollResponseDto {
 interface FindParticipantResponseDto {
   certificate: Omit<RegisterEnrollDto, "paymentDate"> & {
     serviceName: string;
+    scheduleDate: Date;
   };
   address: string;
 }

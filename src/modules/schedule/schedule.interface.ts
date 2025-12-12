@@ -14,7 +14,7 @@ interface Schedule {
 }
 
 interface ScheduleModel extends Model<Schedule> {
-  findAll(query: FilterDto): Promise<ScheduleResponseDto["findAll"]>;
+  findAll(query: FilterDto): Promise<ScheduleResponseDto["findAll"][]>;
 }
 
 export type { Schedule, ScheduleModel };

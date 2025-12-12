@@ -4,6 +4,7 @@ import response from "../../common/utils/response";
 import { ReqUser } from "../auth/auth.dto";
 import {
   type CreateScheduleDto,
+  type ScheduleOptionsDto,
   type ScheduleParamsDto,
   type UpdateScheduleDto,
   createScheduleSchema,
@@ -23,15 +24,12 @@ const scheduleController = {
   },
   findAll: async (req: ReqUser, res: Response) => {
     const query: FilterDto = await filterSchema.validate(req.query);
-    const result = await scheduleService.findAll(query);
+    const options: ScheduleOptionsDto = { ...query, user: req.user };
+    const result = await scheduleService.findAll(options);
     return response.pagination({
       res,
       data: result.data,
-      pagination: {
-        current: result.meta.current,
-        total: result.meta.total,
-        totalPages: result.meta.totalPages,
-      },
+      pagination: result.pagination,
       message: "jadwal berhasil ditemukan",
     });
   },
