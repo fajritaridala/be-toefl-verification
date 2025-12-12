@@ -7,7 +7,7 @@ const roleGuard = (roles: string) => {
     if (!role || !roles.includes(role)) {
       console.log("Error di roleGuard middleware");
       return res.status(403).json({
-        message: "forbidden",
+        message: "akses ditolak",
         data: null,
       });
     }

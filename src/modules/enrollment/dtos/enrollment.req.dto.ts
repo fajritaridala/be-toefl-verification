@@ -1,6 +1,7 @@
 import * as yup from "yup";
 import { QueryDto, querySchema } from "../../../common/dtos/query.dto";
 import { ENROLLED_STATUS } from "../../../common/utils/constants";
+import { UserToken } from "../../auth/auth.interface";
 
 // register
 const enrollUserSchema = yup.object().shape({
@@ -60,6 +61,7 @@ const approvalEnrollParamsSchema = yup.object().shape({
 type ApprovalEnrolDto = yup.InferType<typeof approvalEnrollSchema>;
 type ApprovalEnrolParamsDto = yup.InferType<typeof approvalEnrollParamsSchema>;
 type ApprovalEnrollOptionsDto = {
+  adminId: UserToken["_id"];
   body: ApprovalEnrolDto;
   params: ApprovalEnrolParamsDto;
 };

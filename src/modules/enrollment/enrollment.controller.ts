@@ -85,9 +85,12 @@ const enrollmentController = {
     const body: ApprovalEnrolDto = await approvalEnrollSchema.validate(
       req.body,
     );
+    const adminId = req.user?._id;
+    if (!adminId) throw new Error("id admin tidak ditemukan");
     const options: ApprovalEnrollOptionsDto = {
       params,
       body,
+      adminId,
     };
     const result = await enrollmentService.approval(options);
     return response.success(res, result.data, result.message);

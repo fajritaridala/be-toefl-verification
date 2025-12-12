@@ -27,10 +27,8 @@ interface Enrollment {
     major: string;
   };
   status: string;
-  verification?: {
-    verifiedBy: Types.ObjectId;
-    verifiedAt: Date;
-  };
+  verifiedAt?: Date;
+  verifiedBy?: Types.ObjectId;
   hash?: string;
   createdAt?: Date;
   updatedAt?: Date;

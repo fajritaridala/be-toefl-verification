@@ -51,11 +51,8 @@ const EnrollmentSchema = new Schema<Enrollment, UserStatic>(
       enum: Object.values(ENROLLED_STATUS),
       default: ENROLLED_STATUS.PENDING,
     },
-    verification: {
-      _id: false,
-      verifiedBy: { type: Schema.Types.ObjectId, ref: "users" },
-      verifiedAt: { type: Schema.Types.Date },
-    },
+    verifiedBy: { type: Schema.Types.ObjectId, ref: "users" },
+    verifiedAt: { type: Schema.Types.Date },
     hash: { type: Schema.Types.String },
   },
   {

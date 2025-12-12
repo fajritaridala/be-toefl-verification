@@ -127,6 +127,7 @@ const enrollmentService = {
     return data;
   },
   approval: async (options: ApprovalEnrollOptionsDto) => {
+    const verifiedAt = new Date(Date.now());
     if (
       ![ENROLLED_STATUS.APPROVED, ENROLLED_STATUS.REJECTED].includes(
         options.body.status,
@@ -139,7 +140,11 @@ const enrollmentService = {
         _id: new mongoose.Types.ObjectId(options.params.enrollId),
         status: ENROLLED_STATUS.PENDING,
       },
-      { status: options.body.status },
+      {
+        status: options.body.status,
+        verifiedAt,
+        verifiedBy: new mongoose.Types.ObjectId(options.adminId),
+      },
     );
     if (data.matchedCount === 0)
       throw new Error(
