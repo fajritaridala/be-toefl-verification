@@ -25,7 +25,12 @@ const paginationSchema = yup.object().shape({
 type QueryDto = yup.InferType<typeof querySchema>;
 type FilterDto = yup.InferType<typeof filterSchema>;
 type ParamsDto = yup.InferType<typeof paramsSchema>;
-type OptionsDto = Omit<FilterDto, "page"> & { skip: number; minDate: Date };
+type OptionsDto = Omit<FilterDto, "page"> & { 
+  skip: number; 
+  minDate?: Date;
+  excludeDeleted?: boolean;
+  includeDeleted?: boolean;
+};
 type PaginationDto = yup.InferType<typeof paginationSchema>;
 
 export { filterSchema, paramsSchema, querySchema };

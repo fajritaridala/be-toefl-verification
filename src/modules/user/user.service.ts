@@ -4,7 +4,6 @@ import { FindActivityResponse } from "./dtos/user.res";
 const userService = {
   findActivity: async (participantId: string) => {
     const enrollment = await EnrollmentModel.findActivity(participantId);
-    console.log(new Date(Date.now()));
     const result: FindActivityResponse[] = enrollment.map((item) => {
       return {
         enrollId: item.enrollId,

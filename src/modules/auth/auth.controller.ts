@@ -29,7 +29,6 @@ const authController = {
     return response.success(res, result, "registrasi berhasil");
   },
   getProfile: async (req: ReqUser, res: Response) => {
-    console.log(req.user?.address);
     const address: UserLoginDto = await userLoginSchema.validate({
       address: req.user?.address,
     });

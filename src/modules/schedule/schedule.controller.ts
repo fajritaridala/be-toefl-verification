@@ -1,13 +1,14 @@
-import type { Response } from "express";
+import type { Request, Response } from "express";
 import { FilterDto, filterSchema } from "../../common/dtos/query.dto";
 import response from "../../common/utils/response";
 import { ReqUser } from "../auth/auth.dto";
 import {
   type CreateScheduleDto,
-  type ScheduleOptionsDto,
+  type ScheduleAdminQueryDto,
   type ScheduleParamsDto,
   type UpdateScheduleDto,
   createScheduleSchema,
+  scheduleAdminQuerySchema,
   scheduleParamsSchema,
   updateScheduleSchema,
 } from "./schedule.dto";
@@ -22,10 +23,21 @@ const scheduleController = {
     const result = await scheduleService.create(query, body);
     return response.success(res, result, "jadwal berhasil dibuat");
   },
-  findAll: async (req: ReqUser, res: Response) => {
+  findAllPublic: async (req: Request, res: Response) => {
     const query: FilterDto = await filterSchema.validate(req.query);
-    const options: ScheduleOptionsDto = { ...query, user: req.user };
-    const result = await scheduleService.findAll(options);
+    const result = await scheduleService.findAllPublic(query);
+    return response.pagination({
+      res,
+      data: result.data,
+      pagination: result.pagination,
+      message: "jadwal berhasil ditemukan",
+    });
+  },
+  findAllAdmin: async (req: ReqUser, res: Response) => {
+    const baseQuery: FilterDto = await filterSchema.validate(req.query);
+    const adminQuery = await scheduleAdminQuerySchema.validate(req.query);
+    const query: ScheduleAdminQueryDto = { ...baseQuery, ...adminQuery };
+    const result = await scheduleService.findAllAdmin(query);
     return response.pagination({
       res,
       data: result.data,
@@ -53,3 +65,4 @@ const scheduleController = {
 };
 
 export default scheduleController;
+

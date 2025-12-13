@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import { STATUS } from "../../../common/utils/constants";
 import type { Schedule, ScheduleModel } from "../schedule.interface";
 import findAll from "./schedule.static";
+import { STATUS } from "../schedule.constant";
 
 const Schema = mongoose.Schema;
 
@@ -33,23 +33,35 @@ const ScheduleSchema = new Schema<Schedule, ScheduleModel>(
     },
     status: {
       type: Schema.Types.String,
-      enum: [STATUS.ACTIVE, STATUS.INACTIVE],
+      enum: Object.values(STATUS),
       default: STATUS.ACTIVE,
     },
     registrants: {
       type: Schema.Types.Number,
       default: 0,
     },
+    deletedAt: {
+      type: Schema.Types.Date,
+      default: null,
+      index: true
+    }
   },
   {
+    timestamps: true,
     statics: {
       findAll,
     },
-    timestamps: true,
   },
 );
 
-ScheduleSchema.index({ serviceId: 1, scheduleDate: 1 }, { unique: true });
+// Partial unique index - only enforces uniqueness for non-deleted schedules
+ScheduleSchema.index(
+  { serviceId: 1, scheduleDate: 1 }, 
+  { 
+    unique: true,
+    partialFilterExpression: { deletedAt: null }
+  }
+);
 
 const ScheduleModel = mongoose.model<Schedule, ScheduleModel>(
   "schedules",

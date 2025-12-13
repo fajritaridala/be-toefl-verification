@@ -2,28 +2,38 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const PORT: number | null = Number(process.env.PORT) || null;
-const DATABASE_URL: string = process.env.DATABASE_URL || "";
-const JWT_SECRET: string = process.env.JWT_SECRET || "";
-const ADMIN_TOKEN: string = process.env.ADMIN_TOKEN || "";
+// Required environment variables - app will fail to start if missing
+const PORT = Number(process.env.PORT);
+if (!PORT) throw new Error("PORT environment variable is required");
+
+const DATABASE_URL = process.env.DATABASE_URL;
+if (!DATABASE_URL) throw new Error("DATABASE_URL environment variable is required");
+
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) throw new Error("JWT_SECRET environment variable is required");
+
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN;
+if (!ADMIN_TOKEN) throw new Error("ADMIN_TOKEN environment variable is required");
 
 // Pinata
-const PINATA_JWT: string = process.env.PINATA_JWT || "";
-const PINATA_GATEAWAY: string = process.env.PINATA_GATEAWAY || "";
-const PINATA_URL: string = process.env.PINATA_URL || "";
-const PINATA_GROUP_PRIVATE: string = process.env.PINATA_GROUP_PRIVATE || "";
+const PINATA_JWT = process.env.PINATA_JWT;
+if (!PINATA_JWT) throw new Error("PINATA_JWT environment variable is required");
+
+const PINATA_GATEWAY = process.env.PINATA_GATEAWAY || ""; // Note: typo in source, keeping for backwards compatibility
+const PINATA_URL = process.env.PINATA_URL || "";
+const PINATA_GROUP_PRIVATE = process.env.PINATA_GROUP_PRIVATE || "";
 
 // Cloudinary
-const CLOUDINARY_API_KEY: string = process.env.CLOUDINARY_API_KEY || "";
-const CLOUDINARY_API_SECRET: string = process.env.CLOUDINARY_API_SECRET || "";
-const CLOUDINARY_CLOUD_NAME: string = process.env.CLOUDINARY_CLOUD_NAME || "";
+const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY || "";
+const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET || "";
+const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || "";
 
 export {
   PORT,
   DATABASE_URL,
   JWT_SECRET,
   ADMIN_TOKEN,
-  PINATA_GATEAWAY,
+  PINATA_GATEWAY,
   PINATA_JWT,
   PINATA_URL,
   PINATA_GROUP_PRIVATE,

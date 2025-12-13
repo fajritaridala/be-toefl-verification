@@ -5,21 +5,30 @@ import { ROLES } from "../../common/utils/constants";
 import scheduleController from "./schedule.controller";
 
 const router: Router = Router();
+
+// Admin routes
 router.post("/", [
   auth.user,
   roleGuard(ROLES.ADMIN),
   scheduleController.create,
 ]);
-router.get("/", auth.optional, scheduleController.findAll);
-router.patch("/:scheduleId", [
+router.get("/admin", [
+  auth.user,
+  roleGuard(ROLES.ADMIN),
+  scheduleController.findAllAdmin,
+]);
+router.patch("/:scheduleId/update", [
   auth.user,
   roleGuard(ROLES.ADMIN),
   scheduleController.update,
 ]);
-router.delete("/:scheduleId", [
+router.patch("/:scheduleId/delete", [
   auth.user,
   roleGuard(ROLES.ADMIN),
   scheduleController.remove,
 ]);
+
+// Public routes
+router.get("/", scheduleController.findAllPublic);
 
 export default router;

@@ -1,5 +1,5 @@
 import mongoose, { PipelineStage } from "mongoose";
-import { ENROLLED_STATUS } from "../../../common/utils/constants";
+import { STATUS } from "../enrollment.constant";
 import {
   FindAllEnrollOptionsDto,
   GetScheduleEnrollOptionsDto,
@@ -156,8 +156,9 @@ const enrollStatic = {
     });
 
     const result = await this.aggregate(pipeline).exec();
-    const rows = result[0].rows;
-    const total = result[0].total[0]?.count || 0;
+    const facetResult = result[0];
+    const rows = facetResult?.rows || [];
+    const total = facetResult?.total[0]?.count || 0;
 
     const current = Math.floor(skip / limit + 1);
     const totalPages = Math.ceil(total / limit);
@@ -173,14 +174,13 @@ const enrollStatic = {
   },
   async findParticipant(this: EnrollModel, options: SubmitEnrollParamsDto) {
     const pipeline: PipelineStage[] = [];
-    console.log(options);
 
     pipeline.push(
       {
         $match: {
           _id: new mongoose.Types.ObjectId(options.enrollId),
           participantId: new mongoose.Types.ObjectId(options.participantId),
-          status: ENROLLED_STATUS.APPROVED,
+          status: STATUS.APPROVED,
         },
       },
       {

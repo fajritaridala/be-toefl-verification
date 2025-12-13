@@ -17,7 +17,7 @@ const userStatic = {
         },
       },
       {
-        $unwind: "$schedule",
+        $unwind: { path: "$schedule", preserveNullAndEmptyArrays: true },
       },
       {
         $lookup: {
@@ -27,7 +27,7 @@ const userStatic = {
           as: "service",
         },
       },
-      { $unwind: "$service" },
+      { $unwind: { path: "$service", preserveNullAndEmptyArrays: true } },
       {
         $project: {
           _id: 0,

@@ -1,6 +1,5 @@
 import mongoose, { ClientSession } from "mongoose";
 import { QueryDto } from "../../common/dtos/query.dto";
-import { ENROLLED_STATUS } from "../../common/utils/constants";
 import generateHash from "../../common/utils/hashing";
 import toeflConverter from "../../common/utils/toeflConverter";
 import uploader from "../../common/utils/uploader";
@@ -17,6 +16,7 @@ import {
 } from "./dtos/enrollment.req.dto";
 import { EnrollPinataJson } from "./enrollment.interface";
 import EnrollmentModel from "./model/enrollment.model";
+import { STATUS } from "./enrollment.constant";
 
 const enrollmentService = {
   register: async (options: RegisterEnrollOptionsDto) => {
@@ -51,6 +51,7 @@ const enrollmentService = {
         {
           _id: options.params.scheduleId,
           quota: { $gte: 0 },
+          deletedAt: null,
         },
         {
           $inc: { quota: -1, registrants: 1 },
@@ -129,7 +130,7 @@ const enrollmentService = {
   approval: async (options: ApprovalEnrollOptionsDto) => {
     const verifiedAt = new Date(Date.now());
     if (
-      ![ENROLLED_STATUS.APPROVED, ENROLLED_STATUS.REJECTED].includes(
+      !Object.values(STATUS).includes(
         options.body.status,
       )
     ) {
@@ -138,7 +139,7 @@ const enrollmentService = {
     const data = await EnrollmentModel.updateOne(
       {
         _id: new mongoose.Types.ObjectId(options.params.enrollId),
-        status: ENROLLED_STATUS.PENDING,
+        status: STATUS.PENDING,
       },
       {
         status: options.body.status,
@@ -160,7 +161,6 @@ const enrollmentService = {
     });
     if (!participant) throw new Error("Peserta tidak ditemukan");
     const { certificate, address } = participant;
-    console.log(certificate);
 
     const score = toeflConverter(options.body);
 
@@ -204,7 +204,7 @@ const enrollmentService = {
       {
         $set: {
           hash,
-          status: ENROLLED_STATUS.FINISHED,
+          status: STATUS.FINISHED,
         },
       },
       {

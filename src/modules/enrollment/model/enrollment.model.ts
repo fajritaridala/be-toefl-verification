@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
-import { ENROLLED_STATUS, GENDER } from "../../../common/utils/constants";
+import { GENDER } from "../../../common/utils/constants";
 import { UserStatic } from "../../user/dtos/user.interface";
 import userStatic from "../../user/user.static";
 import { Enrollment } from "../enrollment.interface";
 import enrollStatic from "./enrollment.static";
+import { STATUS } from "../enrollment.constant";
 
 const Schema = mongoose.Schema;
 
@@ -48,8 +49,8 @@ const EnrollmentSchema = new Schema<Enrollment, UserStatic>(
     },
     status: {
       type: Schema.Types.String,
-      enum: Object.values(ENROLLED_STATUS),
-      default: ENROLLED_STATUS.PENDING,
+      enum: Object.values(STATUS),
+      default: STATUS.PENDING,
     },
     verifiedBy: { type: Schema.Types.ObjectId, ref: "users" },
     verifiedAt: { type: Schema.Types.Date },
@@ -67,6 +68,8 @@ const EnrollmentSchema = new Schema<Enrollment, UserStatic>(
 );
 
 EnrollmentSchema.index({ scheduleId: 1, participantId: 1 }, { unique: true });
+EnrollmentSchema.index({ status: 1, createdAt: -1 }); // Optimize findAll with status filter + sort
+EnrollmentSchema.index({ scheduleId: 1, createdAt: -1 }); // Optimize getScheduleParticipants
 
 const EnrollmentModel = mongoose.model<Enrollment, UserStatic>(
   "enrollments",

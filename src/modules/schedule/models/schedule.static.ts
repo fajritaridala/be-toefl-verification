@@ -3,8 +3,15 @@ import type { OptionsDto } from "../../../common/dtos/query.dto";
 import type { ScheduleModel } from "../schedule.interface";
 
 async function findAll(this: ScheduleModel, options: OptionsDto) {
-  const { skip, limit, serviceId, status, month, minDate } = options;
+  const { skip, limit, serviceId, status, month, minDate, excludeDeleted, includeDeleted } = options;
   const pipeline: PipelineStage[] = [];
+
+  // Default: exclude deleted records unless includeDeleted is true
+  if (excludeDeleted || !includeDeleted) {
+    pipeline.push({
+      $match: { deletedAt: null },
+    });
+  }
 
   if (serviceId) {
     pipeline.push({

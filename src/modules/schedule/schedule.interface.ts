@@ -1,5 +1,5 @@
 import { Model, Types } from "mongoose";
-import { FilterDto } from "../../common/dtos/query.dto";
+import { OptionsDto } from "../../common/dtos/query.dto";
 import { ScheduleResponseDto } from "./schedule.dto";
 
 interface Schedule {
@@ -11,10 +11,13 @@ interface Schedule {
   capacity: number;
   quota: number;
   registrants: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+  deletedAt?: Date
 }
 
 interface ScheduleModel extends Model<Schedule> {
-  findAll(query: FilterDto): Promise<ScheduleResponseDto["findAll"][]>;
+  findAll(query: OptionsDto): Promise<ScheduleResponseDto["findAll"]>;
 }
 
 export type { Schedule, ScheduleModel };

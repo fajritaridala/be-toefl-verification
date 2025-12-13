@@ -9,15 +9,17 @@ const authService = {
   loginUser: async (body: UserLoginDto) => {
     const address = body.address;
     const user = await UserModel.findOne({ address }).lean();
-    if (!user) throw new Error("address tidak terdaftar");
+    if (!user) {
+      return null;
+    } else {
+      const token = jwt.generateToken({
+        _id: user._id,
+        address: user.address,
+        role: user.role,
+      });
 
-    const token = jwt.generateToken({
-      _id: user._id,
-      address: user.address,
-      role: user.role,
-    });
-
-    return token;
+      return token;
+    }
   },
   registerUser: async (body: UserRegisterDto) => {
     let role = ROLES.PESERTA;

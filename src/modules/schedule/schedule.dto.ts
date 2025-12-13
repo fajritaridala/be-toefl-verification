@@ -2,7 +2,6 @@ import { Types } from "mongoose";
 import * as yup from "yup";
 import { FilterDto } from "../../common/dtos/query.dto";
 import { PaginationResponse } from "../../common/utils/response";
-import { UserToken } from "../auth/auth.interface";
 
 const scheduleParamsSchema = yup.object().shape({
   scheduleId: yup.string().required(),
@@ -16,19 +15,22 @@ const createScheduleSchema = yup.object().shape({
 });
 const updateScheduleSchema = createScheduleSchema.partial();
 
+const scheduleAdminQuerySchema = yup.object().shape({
+  includeDeleted: yup.boolean().optional().default(false),
+});
+
 // request
 type CreateScheduleDto = yup.InferType<typeof createScheduleSchema> & {
   quota?: number;
 };
 type UpdateScheduleDto = yup.InferType<typeof updateScheduleSchema>;
 type ScheduleParamsDto = yup.InferType<typeof scheduleParamsSchema>;
-type ScheduleOptionsDto = FilterDto & { user?: UserToken };
+type ScheduleAdminQueryDto = FilterDto & yup.InferType<typeof scheduleAdminQuerySchema>;
+
 
 // response
-interface ScheduleResponseDto {
-  findAll: {
-    data: {
-      scheduleId: Types.ObjectId | string;
+interface ScheduleDataDto {
+  scheduleId: Types.ObjectId | string;
       serviceId: Types.ObjectId | string;
       serviceName: string;
       scheduleDate: Date | string;
@@ -38,16 +40,22 @@ interface ScheduleResponseDto {
       capacity: number;
       quota: number;
       registrants: number;
-    };
+      deletedAt?: Date | null;
+}
+
+interface ScheduleResponseDto {
+  findAll: {
+    data: ScheduleDataDto[]
     pagination: PaginationResponse;
   };
 }
 
-export { createScheduleSchema, scheduleParamsSchema, updateScheduleSchema };
+export { createScheduleSchema, scheduleParamsSchema, updateScheduleSchema, scheduleAdminQuerySchema };
 export type {
   CreateScheduleDto,
-  ScheduleOptionsDto,
+  ScheduleAdminQueryDto,
   ScheduleParamsDto,
   ScheduleResponseDto,
   UpdateScheduleDto,
 };
+

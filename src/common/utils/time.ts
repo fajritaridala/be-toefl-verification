@@ -22,6 +22,9 @@ const time = {
     const tz = options.timezone || "Asia/Makassar"; // Default WITA
     return dayjs.tz(timeString, tz).toDate();
   },
+  minDate: (number: number): Date => {
+return dayjs().tz("Asia/Makassar").add(number, "day").startOf("day").toDate()
+  }
 };
 
 export default time;

@@ -1,4 +1,5 @@
 import type { ParamsDto, QueryDto } from "../../common/dtos/query.dto";
+import ScheduleModel from "../schedule/models/schedule.model";
 import type { CreateServiceDto, UpdateServiceDto } from "./service.dto";
 import ServiceModel from "./service.model";
 
@@ -34,6 +35,15 @@ const serviceService = {
     return data;
   },
   remove: async (params: ParamsDto) => {
+    // Check if any active schedule uses this service
+    const activeSchedules = await ScheduleModel.countDocuments({ 
+      serviceId: params.serviceId, 
+      deletedAt: null 
+    });
+    if (activeSchedules > 0) {
+      throw new Error(`Tidak dapat menghapus layanan yang masih memiliki ${activeSchedules} jadwal aktif`);
+    }
+    
     const data = await ServiceModel.findByIdAndDelete({
       _id: params.serviceId,
     });
@@ -42,3 +52,4 @@ const serviceService = {
 };
 
 export default serviceService;
+

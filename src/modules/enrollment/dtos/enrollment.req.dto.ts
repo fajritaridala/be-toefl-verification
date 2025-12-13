@@ -1,7 +1,7 @@
 import * as yup from "yup";
 import { QueryDto, querySchema } from "../../../common/dtos/query.dto";
-import { ENROLLED_STATUS } from "../../../common/utils/constants";
 import { UserToken } from "../../auth/auth.interface";
+import { STATUS } from "../enrollment.constant";
 
 // register
 const enrollUserSchema = yup.object().shape({
@@ -53,7 +53,7 @@ const approvalEnrollSchema = yup.object().shape({
   status: yup
     .string()
     .required("status harus ada")
-    .oneOf([ENROLLED_STATUS.APPROVED, ENROLLED_STATUS.REJECTED]),
+    .oneOf([STATUS.APPROVED, STATUS.REJECTED]),
 });
 const approvalEnrollParamsSchema = yup.object().shape({
   enrollId: yup.string().required("id enroll harus ada"),
@@ -87,9 +87,10 @@ type SubmitEnrollOptionsDto = {
 const blockchainParamsSchema = submitEnrollParamsSchema.shape({
   enrollId: yup.string().required("id enroll harus ada"),
 });
-type BlockchainDto = {
-  hash: string;
-};
+const blockchainSchema = yup.object().shape({
+  hash: yup.string().required("hash harus ada"),
+});
+type BlockchainDto = yup.InferType<typeof blockchainSchema>;
 type BlockchainParamsDto = yup.InferType<typeof blockchainParamsSchema>;
 type BlockchainOptionsDto = {
   body: BlockchainDto;
@@ -100,6 +101,7 @@ export {
   approvalEnrollParamsSchema,
   approvalEnrollSchema,
   blockchainParamsSchema,
+  blockchainSchema,
   enrollUserSchema,
   findAllEnrollQuerySchema,
   registerEnrollParamsSchema,

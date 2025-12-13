@@ -20,6 +20,7 @@ import {
   approvalEnrollParamsSchema,
   approvalEnrollSchema,
   blockchainParamsSchema,
+  blockchainSchema,
   enrollUserSchema,
   findAllEnrollQuerySchema,
   registerEnrollParamsSchema,
@@ -107,7 +108,7 @@ const enrollmentController = {
     const params: BlockchainParamsDto = await blockchainParamsSchema.validate(
       req.params,
     );
-    const body: BlockchainDto = req.body;
+    const body: BlockchainDto = await blockchainSchema.validate(req.body);
     const options: BlockchainOptionsDto = {
       params,
       body,
