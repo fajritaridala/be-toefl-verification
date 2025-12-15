@@ -48,6 +48,7 @@ interface EnrollModel extends Model<Enrollment> {
 
 type EnrollPinataJson = Enrollment["candidate"] & {
   serviceName: string;
+  scheduleDate: Date;
   listening: number;
   reading: number;
   structure: number;

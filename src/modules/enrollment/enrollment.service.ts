@@ -89,12 +89,17 @@ const enrollmentService = {
     if (query.search) {
       options.search = query.search;
     }
+    if (query.serviceId) {
+      options.serviceId = query.serviceId;
+    }
     const { data, pagination } = await EnrollmentModel.findAll(options);
     const result = data.map((item) => ({
       enrollId: item.enrollId,
       scheduleId: item.scheduleId,
       participantId: item.participantId,
       scheduleDate: item.scheduleDate,
+      serviceId: item.serviceId,
+      serviceName: item.serviceName,
       registerAt: item.registerAt,
       paymentDate: item.paymentDate,
       paymentProof: item.paymentProof,
@@ -166,6 +171,7 @@ const enrollmentService = {
 
     const data: EnrollPinataJson = {
       serviceName: certificate.serviceName,
+      scheduleDate: certificate.scheduleDate,
       fullName: certificate.fullName,
       gender: certificate.gender,
       birthDate: certificate.birthDate,

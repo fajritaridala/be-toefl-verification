@@ -35,11 +35,13 @@ type RegisterEnrollOptionsDto = {
 // findAll
 const findAllEnrollQuerySchema = querySchema.shape({
   status: yup.string().optional(),
+  serviceId: yup.string().optional(),
 });
 type FindAllEnrollQueryDto = yup.InferType<typeof findAllEnrollQuerySchema>;
 type FindAllEnrollOptionsDto = Omit<QueryDto, "page"> & {
   skip: number;
   status?: string;
+  serviceId?: string;
 };
 
 // getScheduleParticipants

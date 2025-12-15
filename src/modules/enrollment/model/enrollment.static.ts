@@ -9,13 +9,31 @@ import { EnrollModel } from "../enrollment.interface";
 
 const enrollStatic = {
   async findAll(this: EnrollModel, options: FindAllEnrollOptionsDto) {
-    const { skip = 0, limit = 10, status, search } = options;
+    const { skip = 0, limit = 10, status, search, serviceId } = options;
+    
+    const pipeline: PipelineStage[] = [];
+    
+    // Lookup schedule first (needed for serviceId filter)
+    pipeline.push({
+      $lookup: {
+        from: "schedules",
+        localField: "scheduleId",
+        foreignField: "_id",
+        as: "schedule",
+      },
+    });
+    pipeline.push({
+      $unwind: { path: "$schedule", preserveNullAndEmptyArrays: true },
+    });
+    
+    // Build match query
     const matchQuery: Record<string, any> = {};
-
     if (status) {
       matchQuery.status = status;
     }
-
+    if (serviceId) {
+      matchQuery["schedule.serviceId"] = new mongoose.Types.ObjectId(serviceId);
+    }
     if (search) {
       const regex = new RegExp(search, "i");
       matchQuery.$or = [
@@ -24,64 +42,57 @@ const enrollStatic = {
         { "candidate.nim": regex },
       ];
     }
-
-    const pipeline: PipelineStage[] = [
-      { $match: matchQuery },
-      { $sort: { createdAt: -1 } },
-      {
-        $facet: {
-          rows: [
-            { $skip: skip },
-            { $limit: limit },
-            {
-              $lookup: {
-                from: "schedules",
-                localField: "scheduleId",
-                foreignField: "_id",
-                as: "schedule",
-              },
+    
+    // Apply match if any filters
+    if (Object.keys(matchQuery).length > 0) {
+      pipeline.push({ $match: matchQuery });
+    }
+    
+    pipeline.push({ $sort: { createdAt: -1 } });
+    
+    pipeline.push({
+      $facet: {
+        rows: [
+          { $skip: skip },
+          { $limit: limit },
+          {
+            $lookup: {
+              from: "services",
+              localField: "schedule.serviceId",
+              foreignField: "_id",
+              as: "service",
             },
-            {
-              $unwind: { path: "$schedule", preserveNullAndEmptyArrays: true },
+          },
+          {
+            $unwind: { path: "$service", preserveNullAndEmptyArrays: true },
+          },
+          {
+            $project: {
+              _id: 0,
+              enrollId: "$_id",
+              scheduleId: 1,
+              participantId: 1,
+              serviceId: "$schedule.serviceId",
+              scheduleDate: "$schedule.scheduleDate",
+              serviceName: "$service.name",
+              paymentProof: 1,
+              paymentDate: 1,
+              status: 1,
+              fullName: "$candidate.fullName",
+              gender: "$candidate.gender",
+              birthDate: "$candidate.birthDate",
+              email: "$candidate.email",
+              phoneNumber: "$candidate.phoneNumber",
+              nim: "$candidate.nim",
+              faculty: "$candidate.faculty",
+              major: "$candidate.major",
+              registerAt: "$createdAt",
             },
-            {
-              $lookup: {
-                from: "services",
-                localField: "schedule.serviceId",
-                foreignField: "_id",
-                as: "service",
-              },
-            },
-            {
-              $unwind: { path: "$service", preserveNullAndEmptyArrays: true },
-            },
-            {
-              $project: {
-                _id: 0,
-                enrollId: "$_id",
-                scheduleId: 1,
-                participantId: 1,
-                scheduleDate: "$schedule.scheduleDate",
-                serviceName: "$service.name",
-                paymentProof: 1,
-                paymentDate: 1,
-                status: 1,
-                fullName: "$candidate.fullName",
-                gender: "$candidate.gender",
-                birthDate: "$candidate.birthDate",
-                email: "$candidate.email",
-                phoneNumber: "$candidate.phoneNumber",
-                nim: "$candidate.nim",
-                faculty: "$candidate.faculty",
-                major: "$candidate.major",
-                registerAt: "$createdAt",
-              },
-            },
-          ],
-          total: [{ $count: "count" }],
-        },
+          },
+        ],
+        total: [{ $count: "count" }],
       },
-    ];
+    });
 
     const result = await this.aggregate(pipeline).exec();
     const facetResult = result[0];

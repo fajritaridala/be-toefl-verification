@@ -20,8 +20,8 @@ const serviceService = {
       name: data.name,
       description: data.description,
       price: data.price,
-    };
-    if (data.price) result.price = data.price;
+    } as unknown as CreateServiceDto;
+    if (data.notes) result.notes = data.notes;
     return result;
   },
   update: async (params: ParamsDto, body: UpdateServiceDto) => {
