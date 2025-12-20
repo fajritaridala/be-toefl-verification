@@ -1,0 +1,46 @@
+{
+    "data_input": {
+        "serviceName": "TOEFL Like",
+        "scheduleDate": "2025-12-22T16:00:00.000Z",
+        "fullName": "Muh. Fadjriano Aprilindo T.",
+        "gender": "laki-laki",
+        "birthDate": "2004-04-18T16:00:00.000Z",
+        "email": "fadjritaridala@gmail.com",
+        "phoneNumber": 82249582095,
+        "nim": "F1G121005",
+        "faculty": "Matematika dan Ilmu Pengetahuan Alam",
+        "major": "Ilmu Komputer",
+        "listening": 48,
+        "reading": 41,
+        "structure": 46,
+        "totalScore": 450
+    },
+    "cid": "bafkreibrmsino2gycvbywvatdniplbch76fut6czdty6sv3ynpi5pn2f54",
+    "address": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+}
+{
+    "data_input": {
+        "serviceName": "TOEFL Like",
+        "scheduleDate": "2025-12-22T16:00:00.000Z",
+        "fullName": "Muh. Fadjriano Aprilindo T.",
+        "gender": "laki-laki",
+        "birthDate": "2004-04-18T16:00:00.000Z",
+        "email": "fadjritaridala@gmail.com",
+        "phoneNumber": 82249582095,
+        "nim": "F1G121005",
+        "faculty": "Matematika dan Ilmu Pengetahuan Alam",
+        "major": "Ilmu Komputer",
+        "listening": 48,
+        "reading": 41,
+        "structure": 45,
+        "totalScore": 447
+    },
+    "cid": "bafkreiepbcbeauiumjixtwsqrocqpynxweshdpvnfrm5ifwbsqknzte7da",
+    "address": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+}
+{
+    "diffBits": 133,
+    "totalBits": 256,
+    "percentage": 51.953125,
+    "fixPercentage": "51.95%"
+}

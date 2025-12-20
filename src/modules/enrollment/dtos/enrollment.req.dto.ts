@@ -11,6 +11,18 @@ const registerEnrollParamsSchema = yup.object().shape({
   scheduleId: yup.string().required("scheduleId harus ada"),
 });
 const registerEnrollSchema = yup.object().shape({
+  paymentProof: yup
+    .mixed<Express.Multer.File>()
+    .required("Bukti pembayaran harus diunggah")
+    .test("fileType", "Format file harus JPG, PNG, atau WebP", (value) => {
+      if (!value) return false;
+      const allowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
+      return allowedMimeTypes.includes((value as Express.Multer.File).mimetype);
+    })
+    .test("fileSize", "Ukuran file maksimal 10MB", (value) => {
+      if (!value) return false;
+      return (value as Express.Multer.File).size <= 10 * 1024 * 1024;
+    }),
   paymentDate: yup.date().required("tanggal pembayaran harus ada"),
   fullName: yup.string().required("nama lengkap harus ada"),
   birthDate: yup.date().required("tanggal lahir harus ada"),
@@ -29,7 +41,6 @@ type RegisterEnrollOptionsDto = {
   params: RegisterEnrollParamsDto;
   user: EnrollUserDto;
   body: RegisterEnrollDto;
-  file: Express.Multer.File;
 };
 
 // findAll

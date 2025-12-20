@@ -38,14 +38,14 @@ const enrollmentController = {
     });
     const params: RegisterEnrollParamsDto =
       await registerEnrollParamsSchema.validate(req.params);
-    const body: RegisterEnrollDto = await registerEnrollSchema.validate(
-      req.body,
-    );
+    const body: RegisterEnrollDto = await registerEnrollSchema.validate({
+      ...req.body,
+      paymentProof: file,
+    });
     const options: RegisterEnrollOptionsDto = {
       user,
       params,
       body,
-      file,
     };
     const result = await enrollmentService.register(options);
     return response.success(res, result, "pendaftaran berhasil");

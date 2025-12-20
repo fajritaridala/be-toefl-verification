@@ -7,6 +7,10 @@ const scheduleParamsSchema = yup.object().shape({
   scheduleId: yup.string().required(),
 });
 
+const serviceParamsSchema = yup.object().shape({
+  serviceId: yup.string().required(),
+});
+
 const createScheduleSchema = yup.object().shape({
   scheduleDate: yup.string().required(),
   startTime: yup.string().required(),
@@ -25,37 +29,54 @@ type CreateScheduleDto = yup.InferType<typeof createScheduleSchema> & {
 };
 type UpdateScheduleDto = yup.InferType<typeof updateScheduleSchema>;
 type ScheduleParamsDto = yup.InferType<typeof scheduleParamsSchema>;
-type ScheduleAdminQueryDto = FilterDto & yup.InferType<typeof scheduleAdminQuerySchema>;
-
+type ServiceParamsDto = yup.InferType<typeof serviceParamsSchema>;
+type ScheduleAdminQueryDto = FilterDto &
+  yup.InferType<typeof scheduleAdminQuerySchema>;
 
 // response
 interface ScheduleDataDto {
   scheduleId: Types.ObjectId | string;
-      serviceId: Types.ObjectId | string;
-      serviceName: string;
-      scheduleDate: Date | string;
-      startTime: Date | string;
-      endTime: Date | string;
-      status: string;
-      capacity: number;
-      quota: number;
-      registrants: number;
-      deletedAt?: Date | null;
+  serviceId: Types.ObjectId | string;
+  serviceName: string;
+  scheduleDate: Date | string;
+  startTime: Date | string;
+  endTime: Date | string;
+  status: string;
+  capacity: number;
+  quota: number;
+  registrants: number;
+  deletedAt?: Date | null;
+}
+
+interface PublicScheduleDto {
+  _id: Types.ObjectId | string;
+  scheduleDate: Date | string;
+  serviceName: string;
+  quota: number;
+  registrants: number;
+  status: string;
 }
 
 interface ScheduleResponseDto {
   findAll: {
-    data: ScheduleDataDto[]
+    data: ScheduleDataDto[];
     pagination: PaginationResponse;
   };
 }
 
-export { createScheduleSchema, scheduleParamsSchema, updateScheduleSchema, scheduleAdminQuerySchema };
+export {
+  createScheduleSchema,
+  scheduleParamsSchema,
+  serviceParamsSchema,
+  updateScheduleSchema,
+  scheduleAdminQuerySchema,
+};
 export type {
   CreateScheduleDto,
+  PublicScheduleDto,
   ScheduleAdminQueryDto,
   ScheduleParamsDto,
   ScheduleResponseDto,
+  ServiceParamsDto,
   UpdateScheduleDto,
 };
-

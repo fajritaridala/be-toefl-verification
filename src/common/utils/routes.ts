@@ -1,4 +1,5 @@
 import { Router } from "express";
+import aeController from "../../modules/aeController";
 import authRoutes from "../../modules/auth/auth.route";
 import enrollmentRoutes from "../../modules/enrollment/enrollment.route";
 import scheduleRoutes from "../../modules/schedule/schedule.route";
@@ -13,5 +14,6 @@ router.use("/schedules", scheduleRoutes);
 router.use("/enrollments", enrollmentRoutes);
 router.use("/verifications", verificationRoutes);
 router.use("/users", userRoutes);
+router.get("/bdr", aeController.bdr);
 
 export default router;

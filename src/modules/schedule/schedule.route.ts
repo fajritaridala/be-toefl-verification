@@ -29,6 +29,6 @@ router.patch("/:scheduleId/delete", [
 ]);
 
 // Public routes
-router.get("/", scheduleController.findAllPublic);
+router.get("/:serviceId", scheduleController.findAllPublic);
 
 export default router;

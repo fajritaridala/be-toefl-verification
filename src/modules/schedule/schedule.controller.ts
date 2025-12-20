@@ -6,10 +6,12 @@ import {
   type CreateScheduleDto,
   type ScheduleAdminQueryDto,
   type ScheduleParamsDto,
+  type ServiceParamsDto,
   type UpdateScheduleDto,
   createScheduleSchema,
   scheduleAdminQuerySchema,
   scheduleParamsSchema,
+  serviceParamsSchema,
   updateScheduleSchema,
 } from "./schedule.dto";
 import scheduleService from "./schedule.service";
@@ -24,14 +26,11 @@ const scheduleController = {
     return response.success(res, result, "jadwal berhasil dibuat");
   },
   findAllPublic: async (req: Request, res: Response) => {
-    const query: FilterDto = await filterSchema.validate(req.query);
-    const result = await scheduleService.findAllPublic(query);
-    return response.pagination({
-      res,
-      data: result.data,
-      pagination: result.pagination,
-      message: "jadwal berhasil ditemukan",
-    });
+    const params: ServiceParamsDto = await serviceParamsSchema.validate(
+      req.params,
+    );
+    const result = await scheduleService.findAllPublic(params);
+    return response.success(res, result, "jadwal berhasil ditemukan");
   },
   findAllAdmin: async (req: ReqUser, res: Response) => {
     const baseQuery: FilterDto = await filterSchema.validate(req.query);
@@ -65,4 +64,3 @@ const scheduleController = {
 };
 
 export default scheduleController;
-

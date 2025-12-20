@@ -1,3 +1,4 @@
+import { dataLength } from "ethers";
 import mongoose, { ClientSession } from "mongoose";
 import { QueryDto } from "../../common/dtos/query.dto";
 import generateHash from "../../common/utils/hashing";
@@ -14,9 +15,9 @@ import {
   RegisterEnrollParamsDto,
   SubmitEnrollOptionsDto,
 } from "./dtos/enrollment.req.dto";
+import { STATUS } from "./enrollment.constant";
 import { EnrollPinataJson } from "./enrollment.interface";
 import EnrollmentModel from "./model/enrollment.model";
-import { STATUS } from "./enrollment.constant";
 
 const enrollmentService = {
   register: async (options: RegisterEnrollOptionsDto) => {
@@ -24,9 +25,9 @@ const enrollmentService = {
     let session: ClientSession | null = null;
     let imagePublicId: string | null = null;
 
-    if (!options.file) throw new Error("file wajib ada");
+    if (!options.body.paymentProof) throw new Error("file wajib ada");
     const image = await uploader.cloudinary.uploadFile(
-      options.file,
+      options.body.paymentProof,
       options.body.fullName,
     );
     imagePublicId = image.public_id;
@@ -134,11 +135,7 @@ const enrollmentService = {
   },
   approval: async (options: ApprovalEnrollOptionsDto) => {
     const verifiedAt = new Date(Date.now());
-    if (
-      !Object.values(STATUS).includes(
-        options.body.status,
-      )
-    ) {
+    if (!Object.values(STATUS).includes(options.body.status)) {
       throw new Error("Invalid status");
     }
     const data = await EnrollmentModel.updateOne(
@@ -190,7 +187,10 @@ const enrollmentService = {
 
     // const { cid } = await uploader.pinata.json(data, fileName);
     const { cid } = await uploader.pinata.json(data, fileName);
-    const hash = `0x${generateHash({ cid, address })}`;
+
+    const hash = `0x${generateHash({ cid, address, data })}`;
+    // const hash = generateHash({ cid, address, data });
+    // return { data_input: data, cid, address, hash };
 
     return {
       cid,

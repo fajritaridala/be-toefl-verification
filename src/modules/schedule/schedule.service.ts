@@ -5,6 +5,7 @@ import {
   CreateScheduleDto,
   ScheduleAdminQueryDto,
   ScheduleParamsDto,
+  ServiceParamsDto,
   UpdateScheduleDto,
 } from "./schedule.dto";
 
@@ -12,12 +13,12 @@ const scheduleService = {
   create: async (query: FilterDto, body: CreateScheduleDto) => {
     // Menggunakan default timezone (Asia/Makassar) dari utils/time.ts
     const scheduleDate = time.parseDate(body.scheduleDate);
-    
+
     const startTime = time.applyTime({
       date: body.scheduleDate,
       hour: body.startTime,
     });
-    
+
     const endTime = time.applyTime({
       date: body.scheduleDate,
       hour: body.endTime,
@@ -42,30 +43,22 @@ const scheduleService = {
     });
     return result;
   },
-  findAllPublic: async (query: FilterDto) => {
-    const { page, limit, ...params } = query;
-    const skip = (page - 1) * limit;
+  findAllPublic: async (params: ServiceParamsDto) => {
     const minDate = time.minDate(7);
 
-    const options = { skip, limit, minDate, excludeDeleted: true, ...params };
-    const { data, pagination } = await ScheduleModel.findAll(options);
-    
-    const result = data.map((item) => {
-      return {
-        scheduleId: item.scheduleId,
-        serviceId: item.serviceId,
-        serviceName: item.serviceName,
-        scheduleDate: item.scheduleDate,
-        startTime: item.startTime,
-        endTime: item.endTime,
-        status: item.status,
-        capacity: item.capacity,
-        quota: item.quota,
-        registrants: item.registrants,
-      };
+    const data = await ScheduleModel.findAllPublic({
+      serviceId: params.serviceId,
+      minDate,
     });
 
-    return { data: result, pagination };
+    return data.map((item) => ({
+      _id: item._id,
+      scheduleDate: item.scheduleDate,
+      serviceName: item.serviceName,
+      quota: item.quota,
+      registrants: item.registrants,
+      status: item.status,
+    }));
   },
   findAllAdmin: async (query: ScheduleAdminQueryDto) => {
     const { page, limit, includeDeleted, ...params } = query;
@@ -73,7 +66,7 @@ const scheduleService = {
 
     const options = { skip, limit, includeDeleted, ...params };
     const { data, pagination } = await ScheduleModel.findAll(options);
-    
+
     const result = data.map((item) => {
       return {
         scheduleId: item.scheduleId,
@@ -105,15 +98,19 @@ const scheduleService = {
     return data;
   },
   remove: async (params: ScheduleParamsDto) => {
-    const data = await ScheduleModel.findByIdAndUpdate({
-      _id: params.scheduleId
-    }, {
-      $set: {
-        deletedAt: new Date()
-      }
-    }, {
-      new: true
-    })
+    const data = await ScheduleModel.findByIdAndUpdate(
+      {
+        _id: params.scheduleId,
+      },
+      {
+        $set: {
+          deletedAt: new Date(),
+        },
+      },
+      {
+        new: true,
+      },
+    );
     return data;
   },
 };
