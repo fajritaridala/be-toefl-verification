@@ -23,17 +23,8 @@ const scheduleController = {
     const result = await scheduleService.create(query, body);
     return response.success(res, result, "jadwal berhasil dibuat");
   },
-  findAllPublic: async (req: Request, res: Response) => {
-    const query: FilterDto = await filterSchema.validate(req.query);
-    const result = await scheduleService.findAllPublic(query);
-    return response.pagination({
-      res,
-      data: result.data,
-      pagination: result.pagination,
-      message: "jadwal berhasil ditemukan",
-    });
-  },
   findAllAdmin: async (req: ReqUser, res: Response) => {
+    console.log(req.query)
     const baseQuery: FilterDto = await filterSchema.validate(req.query);
     const adminQuery = await scheduleAdminQuerySchema.validate(req.query);
     const query: ScheduleAdminQueryDto = { ...baseQuery, ...adminQuery };
@@ -45,6 +36,12 @@ const scheduleController = {
       message: "jadwal berhasil ditemukan",
     });
   },
+  findAllPublic: async (req: Request, res: Response) => {
+    const query: FilterDto = await filterSchema.validate(req.query);
+    const result = await scheduleService.findAllPublic(query);
+    return response.success(res, result.data, "jadwal berhasil ditemukan");
+  },
+
   update: async (req: ReqUser, res: Response) => {
     const params: ScheduleParamsDto = await scheduleParamsSchema.validate(
       req.params,
@@ -65,4 +62,3 @@ const scheduleController = {
 };
 
 export default scheduleController;
-

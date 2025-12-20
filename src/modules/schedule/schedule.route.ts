@@ -7,15 +7,15 @@ import scheduleController from "./schedule.controller";
 const router: Router = Router();
 
 // Admin routes
-router.post("/", [
-  auth.user,
-  roleGuard(ROLES.ADMIN),
-  scheduleController.create,
-]);
 router.get("/admin", [
   auth.user,
   roleGuard(ROLES.ADMIN),
   scheduleController.findAllAdmin,
+]);
+router.post("/", [
+  auth.user,
+  roleGuard(ROLES.ADMIN),
+  scheduleController.create,
 ]);
 router.patch("/:scheduleId/update", [
   auth.user,

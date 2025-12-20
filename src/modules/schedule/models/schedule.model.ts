@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import type { Schedule, ScheduleModel } from "../schedule.interface";
-import findAll from "./schedule.static";
 import { STATUS } from "../schedule.constant";
+import type { Schedule, ScheduleModel } from "../schedule.interface";
+import { findAllAdmin, findAllPublic } from "./schedule.static";
 
 const Schema = mongoose.Schema;
 
@@ -43,24 +43,25 @@ const ScheduleSchema = new Schema<Schedule, ScheduleModel>(
     deletedAt: {
       type: Schema.Types.Date,
       default: null,
-      index: true
-    }
+      index: true,
+    },
   },
   {
     timestamps: true,
     statics: {
-      findAll,
+      findAllAdmin,
+      findAllPublic,
     },
   },
 );
 
 // Partial unique index - only enforces uniqueness for non-deleted schedules
 ScheduleSchema.index(
-  { serviceId: 1, scheduleDate: 1 }, 
-  { 
+  { serviceId: 1, scheduleDate: 1 },
+  {
     unique: true,
-    partialFilterExpression: { deletedAt: null }
-  }
+    partialFilterExpression: { deletedAt: null },
+  },
 );
 
 const ScheduleModel = mongoose.model<Schedule, ScheduleModel>(

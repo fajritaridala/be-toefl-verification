@@ -1,5 +1,4 @@
 import { Model, Types } from "mongoose";
-import { OptionsDto } from "../../common/dtos/query.dto";
 import { ScheduleResponseDto } from "./schedule.dto";
 
 interface Schedule {
@@ -13,11 +12,28 @@ interface Schedule {
   registrants: number;
   createdAt?: Date;
   updatedAt?: Date;
-  deletedAt?: Date
+  deletedAt?: Date;
+}
+
+interface AdminOptions {
+  skip: number;
+  limit: number;
+  serviceId?: string;
+  status?: string;
+  month?: number;
+  includeDeleted?: boolean;
+}
+
+interface PublicOptions {
+  serviceId?: string;
+  minDate: Date;
 }
 
 interface ScheduleModel extends Model<Schedule> {
-  findAll(query: OptionsDto): Promise<ScheduleResponseDto["findAll"]>;
+  findAllAdmin(options: AdminOptions): Promise<ScheduleResponseDto["findAll"]>;
+  findAllPublic(
+    options: PublicOptions,
+  ): Promise<ScheduleResponseDto["findAll"]>;
 }
 
-export type { Schedule, ScheduleModel };
+export type { Schedule, ScheduleModel, AdminOptions, PublicOptions };
