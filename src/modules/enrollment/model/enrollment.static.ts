@@ -84,6 +84,7 @@ const enrollStatic = {
     ];
 
     const result = await this.aggregate(pipeline).exec();
+    console.log(result[0])
     const facetResult = result[0];
     const rows = facetResult?.rows || [];
     const total = facetResult?.total[0]?.count || 0;

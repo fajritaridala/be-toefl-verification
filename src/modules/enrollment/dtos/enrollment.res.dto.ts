@@ -6,6 +6,7 @@ interface EnrollmentItem extends RegisterEnrollDto {
   enrollId: Types.ObjectId | string;
   scheduleId: Types.ObjectId | string;
   participantId: Types.ObjectId | string;
+  serviceName: string;
   paymentProof: string;
   paymentDate: Date;
   scheduleDate: Date;

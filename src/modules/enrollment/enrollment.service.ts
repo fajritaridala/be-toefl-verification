@@ -95,6 +95,7 @@ const enrollmentService = {
       scheduleId: item.scheduleId,
       participantId: item.participantId,
       scheduleDate: item.scheduleDate,
+      serviceName: item.serviceName,
       registerAt: item.registerAt,
       paymentDate: item.paymentDate,
       paymentProof: item.paymentProof,
