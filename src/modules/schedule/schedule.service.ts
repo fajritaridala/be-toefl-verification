@@ -10,7 +10,6 @@ import {
 
 const scheduleService = {
   create: async (query: FilterDto, body: CreateScheduleDto) => {
-    // Menggunakan default timezone (Asia/Makassar) dari utils/time.ts
     const scheduleDate = time.parseDate(body.scheduleDate);
 
     const startTime = time.applyTime({
@@ -93,15 +92,51 @@ const scheduleService = {
   },
 
   update: async (params: ScheduleParamsDto, body: UpdateScheduleDto) => {
+    const existingSchedule = await ScheduleModel.findOne({
+      _id: params.scheduleId,
+      deletedAt: null,
+    });
+    if (!existingSchedule) {
+      throw new Error("Jadwal tidak ditemukan atau sudah dihapus");
+    }
+    // Handle Capacity & Quota Logic
+    if (
+      body.capacity !== undefined &&
+      body.capacity !== existingSchedule.capacity
+    ) {
+      const capacityDiff = body.capacity - existingSchedule.capacity;
+      const newQuota = existingSchedule.quota + capacityDiff;
+
+      const registrants = existingSchedule.capacity - existingSchedule.quota;
+      if (body.capacity < registrants) {
+        throw new Error(
+          `Capacity tidak boleh kurang dari jumlah pendaftar (${registrants} orang)`,
+        );
+      }
+      body.quota = Math.max(0, newQuota);
+    }
+
+    const payload: any = { ...body };
+
+    if (body.scheduleDate && body.startTime && body.endTime) {
+      payload.scheduleDate = time.parseDate(body.scheduleDate);
+
+      payload.startTime = time.applyTime({
+        date: body.scheduleDate,
+        hour: body.startTime,
+      });
+
+      payload.endTime = time.applyTime({
+        date: body.scheduleDate,
+        hour: body.endTime,
+      });
+    }
+
     const data = await ScheduleModel.findOneAndUpdate(
-      {
-        _id: params.scheduleId,
-        deletedAt: null,
-      },
-      { $set: body },
+      { _id: params.scheduleId, deletedAt: null },
+      { $set: payload },
       { new: true },
     );
-    if (!data) throw new Error("Jadwal tidak ditemukan atau sudah dihapus");
     return data;
   },
   remove: async (params: ScheduleParamsDto) => {

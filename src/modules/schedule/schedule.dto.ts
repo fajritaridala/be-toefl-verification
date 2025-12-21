@@ -20,10 +20,10 @@ const scheduleAdminQuerySchema = yup.object().shape({
 });
 
 // request
-type CreateScheduleDto = yup.InferType<typeof createScheduleSchema> & {
+type CreateScheduleDto = yup.InferType<typeof createScheduleSchema>;
+type UpdateScheduleDto = yup.InferType<typeof updateScheduleSchema> & {
   quota?: number;
 };
-type UpdateScheduleDto = yup.InferType<typeof updateScheduleSchema>;
 type ScheduleParamsDto = yup.InferType<typeof scheduleParamsSchema>;
 type ScheduleAdminQueryDto = FilterDto & yup.InferType<typeof scheduleAdminQuerySchema>;
 
