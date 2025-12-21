@@ -97,6 +97,7 @@ const enrollmentController = {
     return response.success(res, result.data, result.message);
   }, // admin melakukan approve ke peserta yang mendaftar
   submitScore: async (req: ReqUser, res: Response) => {
+    console.log(req.body)
     const params: SubmitEnrollParamsDto =
       await submitEnrollParamsSchema.validate(req.params);
     const body: SubmitEnrollDto = await submitEnrollSchema.validate(req.body);

@@ -3,6 +3,7 @@ import authRoutes from "../../modules/auth/auth.route";
 import enrollmentRoutes from "../../modules/enrollment/enrollment.route";
 import scheduleRoutes from "../../modules/schedule/schedule.route";
 import serviceRoutes from "../../modules/service/service.route";
+import aeRoutes from "../../modules/testing/AE.route";
 import userRoutes from "../../modules/user/user.route";
 import verificationRoutes from "../../modules/verification/verify.route";
 
@@ -13,5 +14,6 @@ router.use("/schedules", scheduleRoutes);
 router.use("/enrollments", enrollmentRoutes);
 router.use("/verifications", verificationRoutes);
 router.use("/users", userRoutes);
+router.use("/ae-testing", aeRoutes);
 
 export default router;

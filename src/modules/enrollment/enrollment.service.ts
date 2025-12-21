@@ -14,9 +14,9 @@ import {
   RegisterEnrollParamsDto,
   SubmitEnrollOptionsDto,
 } from "./dtos/enrollment.req.dto";
+import { STATUS } from "./enrollment.constant";
 import { EnrollPinataJson } from "./enrollment.interface";
 import EnrollmentModel from "./model/enrollment.model";
-import { STATUS } from "./enrollment.constant";
 
 const enrollmentService = {
   register: async (options: RegisterEnrollOptionsDto) => {
@@ -130,11 +130,7 @@ const enrollmentService = {
   },
   approval: async (options: ApprovalEnrollOptionsDto) => {
     const verifiedAt = new Date(Date.now());
-    if (
-      !Object.values(STATUS).includes(
-        options.body.status,
-      )
-    ) {
+    if (!Object.values(STATUS).includes(options.body.status)) {
       throw new Error("Invalid status");
     }
     const data = await EnrollmentModel.updateOne(
@@ -156,17 +152,20 @@ const enrollmentService = {
     return { data, message: `peserta telah ${options.body.status}` };
   },
   submitScore: async (options: SubmitEnrollOptionsDto) => {
+    console.log(options.params.participantId);
     const participant = await EnrollmentModel.findParticipant({
       participantId: options.params.participantId,
       enrollId: options.params.enrollId,
     });
     if (!participant) throw new Error("Peserta tidak ditemukan");
+    console.log(participant);
     const { certificate, address } = participant;
 
     const score = toeflConverter(options.body);
 
     const data: EnrollPinataJson = {
       serviceName: certificate.serviceName,
+      scheduleDate: certificate.scheduleDate,
       fullName: certificate.fullName,
       gender: certificate.gender,
       birthDate: certificate.birthDate,
@@ -181,7 +180,12 @@ const enrollmentService = {
       totalScore: score.totalScore,
     };
 
-    const fileName: string = `${data.nim}-${data.fullName.split(" ")[1].toLowerCase()}.json`;
+    let fileName: string;
+    if (data.fullName.toLowerCase().includes(" ")) {
+      fileName = `${data.nim}-${data.fullName.split(" ")[0]}.json`;
+    } else {
+      fileName = `${data.nim}-${data.fullName}.json`;
+    }
 
     // const { cid } = await uploader.pinata.json(data, fileName);
     const { cid } = await uploader.pinata.json(data, fileName);
