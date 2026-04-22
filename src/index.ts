@@ -18,11 +18,10 @@ app.use(bodyParser.json());
 
 // api health check
 app.get("/health", async (req: Request, res: Response) => {
-  const isDbHealthy = checkHealth.database();
-  const [isCloudinaryHealthy, isPinataHealthy] = await Promise.all([
-    checkHealth.claudinary(),
-    checkHealth.pinata(),
-  ]);
+  const [isCloudinaryHealthy, isPinataHealthy, isDbHealthy] = await Promise.all(
+    [checkHealth.claudinary(), checkHealth.pinata(), checkHealth.database()],
+  );
+
   const isAllHealthy = isDbHealthy && isCloudinaryHealthy && isPinataHealthy;
 
   res.status(isAllHealthy ? 200 : 503).json({

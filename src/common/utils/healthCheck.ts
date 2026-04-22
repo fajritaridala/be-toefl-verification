@@ -3,7 +3,10 @@ import mongoose from "mongoose";
 import pinata from "../../config/pinata";
 
 const checkHealth = {
-  database: () => {
+  database: async () => {
+    if (mongoose.connection.readyState === 2) {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    }
     return mongoose.connection.readyState === 1;
   },
   pinata: async () => {
