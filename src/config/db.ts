@@ -7,7 +7,7 @@ const dbConnect = async () => {
     await mongoose.connect(DATABASE_URL!, {
       dbName: "toefl-verfication-system",
     });
-    return Promise.resolve("Database connected!");
+    return Promise.resolve("Connected!");
   } catch (error) {
     return Promise.reject(error);
   }
